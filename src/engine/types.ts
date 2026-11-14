@@ -100,6 +100,20 @@ export interface PhraseSlotQuestion {
   filled: Record<string, string>
 }
 
+export interface IntroQuestion {
+  format: 'intro'
+  /** 単語のID。見出し語・意味・例文などは、画面側が単語データから表示する */
+  itemId: string
+}
+
+export interface FlashcardQuestion {
+  format: 'flashcard'
+  itemId: string
+  /** 表(外国語)と裏(母語) */
+  front: string
+  back: string
+}
+
 export interface MatchPair {
   id: string
   foreign: string
@@ -112,4 +126,37 @@ export interface MatchQuestion {
   /** 左(外国語)・右(母語)の表示順(pair の id を並べたもの) */
   foreignOrder: string[]
   nativeOrder: string[]
+}
+
+/** 1つの出題(データ) */
+export type Question =
+  | IntroQuestion
+  | FlashcardQuestion
+  | McqQuestion
+  | ClozeQuestion
+  | TypingQuestion
+  | TilesQuestion
+  | MatchQuestion
+  | PhraseSlotQuestion
+
+/** 学習者の回答(画面から渡す) */
+export type Response =
+  | { kind: 'ack' }
+  | { kind: 'choice'; optionId: string }
+  | { kind: 'text'; text: string }
+  | { kind: 'tiles'; tiles: string[] }
+  | { kind: 'match'; pairs: { foreignId: string; nativeId: string }[] }
+  | { kind: 'selfGrade'; grade: 'again' | 'hard' | 'good' | 'easy' }
+
+/** 答え合わせの結果 */
+export interface Judgement {
+  correct: boolean
+  /** 入力式で、1文字違い(おしい) */
+  close: boolean
+  /** おしいときのヒント */
+  hint?: string
+  /** 正解の表示用テキスト */
+  correctText: string
+  /** 自己採点のとき、選ばれた評価 */
+  selfGrade?: 'again' | 'hard' | 'good' | 'easy'
 }
