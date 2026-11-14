@@ -1,0 +1,37 @@
+.settings-page {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.settings-section {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-heading {
+  font-size: var(--font-size-lg);
+}
+
+.settings-field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.settings-checkbox-field {
+  align-items: center;
+}
+
+.settings-note {
+  color: var(--color-primary);
+}
+
+.settings-saved {
+  min-height: var(--font-size-lg);
+}
+
+.settings-llm input:disabled {
+  opacity: 0.6;
+}

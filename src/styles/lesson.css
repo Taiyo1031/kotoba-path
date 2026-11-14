@@ -1,0 +1,81 @@
+﻿.lesson-runner {
+  padding: var(--space-4);
+}
+.lesson-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.lesson-progress-section {
+  flex: 1;
+}
+.lesson-progress {
+  overflow: hidden;
+  height: var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-strong);
+}
+.lesson-progress-fill {
+  height: 100%;
+  background: var(--color-success);
+  transition: width var(--duration-slow) var(--easing-standard);
+}
+.lesson-body {
+  max-width: 44rem;
+  margin: var(--space-8) auto;
+}
+.lesson-complete {
+  position: relative;
+  text-align: center;
+  padding: var(--space-8);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.lesson-complete h1 {
+  font-size: var(--font-size-3xl);
+}
+.lesson-complete p {
+  margin-block: var(--space-4);
+}
+.lesson-confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.lesson-confetti-piece {
+  position: absolute;
+  top: 0;
+  width: var(--space-2);
+  height: var(--space-3);
+  background: var(--color-accent);
+  animation: lesson-fall calc(var(--duration-slow) * 4) ease-in both;
+}
+.lesson-confetti-piece:nth-child(even) {
+  background: var(--color-primary);
+}
+.lesson-confetti-piece:nth-child(3n) {
+  background: var(--color-success);
+}
+@keyframes lesson-fall {
+  from {
+    transform: translateY(-100%) rotate(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(40vh) rotate(300deg);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lesson-progress-fill {
+    transition: none;
+  }
+  .lesson-confetti {
+    display: none;
+  }
+  .lesson-confetti-piece {
+    animation: none;
+  }
+}
