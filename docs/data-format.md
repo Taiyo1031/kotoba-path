@@ -184,6 +184,21 @@
 | streak       | Streak    | ✅   | { "days": 0, "lastStudyDate": null } | 連続日数情報                   |
 | sessions     | Session[] | ✅   | []                                   | 学習セッション履歴             |
 
+### FsrsRecord(`progress.fsrs` の値。キーは単語・フレーズのID)
+
+| 名前          | 型     | 必須 | 既定値 | 説明                                                                           |
+| ------------- | ------ | ---- | ------ | ------------------------------------------------------------------------------ |
+| due           | string | ✅   | -      | 次回の復習日時(ISO 8601)                                                       |
+| stability     | number | ✅   | -      | 安定度(日)                                                                     |
+| difficulty    | number | ✅   | -      | 難易度                                                                         |
+| elapsedDays   | number | ✅   | -      | 前回の復習からの経過日数                                                       |
+| scheduledDays | number | ✅   | -      | 予定した間隔(日)                                                               |
+| reps          | number | ✅   | -      | 復習回数                                                                       |
+| lapses        | number | ✅   | -      | 忘却(Again)の回数                                                              |
+| state         | number | ✅   | -      | 0=新規 / 1=学習中 / 2=復習 / 3=再学習                                          |
+| lastReview    | string |      | -      | 前回の復習日時(ISO 8601)                                                       |
+| learningSteps | number |      | 0      | ts-fsrs v6 の学習ステップの進み。省略可(2026-11-15 追加。既存データは壊れない) |
+
 ### Streak
 
 | 名前          | 型                   | 必須 | 既定値 | 説明         |

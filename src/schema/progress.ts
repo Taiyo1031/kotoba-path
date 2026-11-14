@@ -13,6 +13,8 @@ export const FsrsRecordSchema = z.object({
   lapses: count,
   state: z.number().int().min(0).max(3),
   lastReview: IsoDateTimeSchema.optional(),
+  /** ts-fsrs v6 の learning_steps(学習・再学習ステップの進み)。省略時は 0 として扱う */
+  learningSteps: count.optional(),
 })
 export const UnitProgressSchema = z.object({
   introducedItemIds: ids.default([]),
