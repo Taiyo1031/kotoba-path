@@ -9,6 +9,10 @@ npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
 
+# dev-router / LM Studio の作業ログ
+.tasks/
+.lmstudio/
+
 # テスト成果物
 playwright-report/
 test-results/
