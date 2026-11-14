@@ -1,0 +1,74 @@
+:root {
+  /* 色 */
+  --color-primary: #4f8cff;
+  --color-primary-strong: #245fc4;
+  --color-primary-soft: #d1e2ff;
+  --color-accent: #ffd166;
+  --color-accent-strong: #f5b93c;
+  --color-accent-soft: #fff4dd;
+  --color-success: #4cc38a;
+  --color-success-strong: #3aa772;
+  --color-success-soft: #d1f0e3;
+  --color-danger: #ef6461;
+  --color-danger-strong: #d94c49;
+  --color-danger-soft: #fad5d5;
+  --color-bg: #f7faff;
+  --color-bg-strong: #e5eeff;
+  --color-bg-soft: #fbfdff;
+  --color-surface: #ffffff;
+  --color-surface-strong: #eaf1ff;
+  --color-surface-soft: #f5f8ff;
+  --color-text: #1f2a44;
+  --color-text-strong: #121c32;
+  --color-text-soft: #43516b;
+  --color-text-muted: #6b7280;
+  --color-text-muted-strong: #515967;
+  --color-text-muted-soft: #727b8b;
+  --color-border: #e5e7eb;
+  --color-border-strong: #b7c4d9;
+  --color-border-soft: #eff2f7;
+
+  /* 余白 */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 1.75rem;
+  --space-8: 2rem;
+
+  /* 角丸 */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-pill: 9999px;
+
+  /* 影 */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+  /* 文字サイズ */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+
+  /* フォント */
+  --font-family: 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', system-ui, sans-serif;
+
+  /* アニメーション */
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 400ms;
+  --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 将来のダークテーマでは、ここでトークンを上書きする。 */
+:root[data-theme='dark'] {
+}

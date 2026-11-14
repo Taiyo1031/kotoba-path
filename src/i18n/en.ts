@@ -1,0 +1,80 @@
+import type { ja } from './ja'
+
+export const en: Record<keyof typeof ja, string> = {
+  'app.name': '{appName}',
+
+  'nav.home': 'Home',
+  'nav.review': 'Review',
+  'nav.data': 'Data',
+  'nav.settings': 'Settings',
+
+  'page.welcome': 'Welcome',
+  'page.home': 'Home',
+  'page.unit': 'Unit',
+  'page.lesson': 'Lesson',
+  'page.review': 'Review',
+  'page.data': 'Data Management',
+  'page.settings': 'Settings',
+  'page.debug': 'Debug',
+
+  'common.save': 'Save',
+  'common.cancel': 'Cancel',
+  'common.next': 'Next',
+  'common.back': 'Back',
+  'common.copy': 'Copy',
+  'common.copied': 'Copied',
+  'common.download': 'Download',
+  'common.delete': 'Delete',
+  'common.confirm': 'Confirm',
+  'common.close': 'Close',
+  'common.loading': 'Loading',
+  'common.error': 'Error',
+
+  'welcome.step.language': 'Choose a language to learn',
+  'welcome.step.purpose': 'Why do you want to learn?',
+  'welcome.step.goal': 'Set your goal and deadline',
+
+  'welcome.language.label': 'Target language',
+  'welcome.purpose.label': 'Reasons for learning',
+  'welcome.purpose.free': 'Other reasons (free text)',
+  'welcome.purpose.tag.travel': 'Travel',
+  'welcome.purpose.tag.work': 'Work',
+  'welcome.purpose.tag.daily': 'Daily conversation',
+  'welcome.purpose.tag.localFriends': 'Talk with local friends',
+  'welcome.purpose.tag.peers': 'Talk with peers',
+
+  'welcome.goal.deadline': 'Target deadline',
+  'welcome.goal.level': 'Target level',
+  'welcome.goal.dailyMinutes': 'Daily study time (minutes)',
+
+  'welcome.level.greeting': 'Can greet people',
+  'welcome.level.travel': 'Get by while traveling',
+  'welcome.level.daily': 'Start having everyday conversations',
+
+  'home.todayGoal': 'Today\'s goal',
+  'home.streak': '{days} days in a row',
+  'home.xp': 'XP',
+  'home.backup.warn': 'Not backed up for {days} days',
+
+  'lesson.check': 'Check',
+  'lesson.next': 'Next',
+  'lesson.correct': 'Correct!',
+  'lesson.incorrect': 'Incorrect',
+  'lesson.hint': 'Hint',
+
+  'data.prompt.skeleton': 'Skeleton prompt',
+  'data.prompt.unit': 'Unit prompt',
+  'data.import': 'Import',
+  'data.export.json': 'Export as JSON',
+  'data.export.csv': 'Export as CSV',
+  'data.backup.last': 'Last backup: {date}',
+  'data.backup.never': 'Never backed up',
+  'data.reset': 'Reset data',
+  'data.reset.confirm': 'Are you sure you want to delete all learning data?',
+
+  'settings.uiLanguage': 'UI Language',
+  'settings.dailyGoal': 'Daily Goal',
+  'settings.studyDays': 'Study Days/Week',
+  'settings.tts': 'Text-to-Speech',
+  'settings.llm': 'LLM Connection',
+}

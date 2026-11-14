@@ -9,6 +9,9 @@ npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
 
+# Python のキャッシュ(scripts/ の補助スクリプト)
+__pycache__/
+
 # dev-router / LM Studio の作業ログ
 .tasks/
 .lmstudio/

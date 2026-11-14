@@ -1,0 +1,253 @@
+/* ボックスサイズ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+}
+
+/* 本文の文字色・背景 */
+body {
+  margin: 0;
+  min-width: 0;
+  min-height: 100vh;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+#root,
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+img,
+svg {
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+/* 見出し */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+  margin-bottom: var(--space-3);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+h1 {
+  font-size: var(--font-size-3xl);
+}
+
+h2 {
+  font-size: var(--font-size-2xl);
+}
+
+h3 {
+  font-size: var(--font-size-xl);
+}
+
+h4 {
+  font-size: var(--font-size-lg);
+}
+
+h5,
+h6 {
+  font-size: var(--font-size-base);
+}
+
+p {
+  margin-block: 0 var(--space-4);
+}
+
+/* リンク */
+a {
+  color: var(--color-primary-strong);
+  text-underline-offset: 0.2em;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+a:hover,
+a:focus-visible {
+  color: var(--color-text-strong);
+}
+
+/* リンクやフォームを含め、キーボードの現在位置を示す。 */
+:focus-visible {
+  outline: 3px solid var(--color-primary-strong);
+  outline-offset: 3px;
+}
+
+/* ボタン */
+button,
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+
+button:enabled:hover,
+.button:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+select,
+textarea,
+input:not([type='checkbox']):not([type='radio']) {
+  min-height: 2.75rem;
+  max-width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+}
+
+/* レイアウト */
+.container,
+.header,
+.app-header,
+main {
+  width: 100%;
+  max-width: 60rem;
+  min-width: 0;
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+.header,
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-6);
+  justify-content: space-between;
+  align-items: center;
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.app-brand {
+  color: var(--color-text);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.header nav,
+.app-header nav,
+.app-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.header nav a,
+.app-header nav a,
+.app-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-soft);
+  text-decoration: none;
+}
+
+.header nav a:hover,
+.app-header nav a:hover,
+.app-nav a:hover {
+  background-color: var(--color-surface-strong);
+}
+
+nav a[aria-current='page'] {
+  color: var(--color-primary-strong);
+  background-color: var(--color-primary-soft);
+  font-weight: 700;
+}
+
+.main,
+.app-main,
+main {
+  padding-block: var(--space-6);
+}
+
+.page {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.page-title,
+.page-description {
+  margin: 0;
+}
+
+.page-description {
+  color: var(--color-text-muted);
+}
+
+.page-params {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.language-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.debug-link {
+  justify-self: start;
+  color: var(--color-text-muted-soft);
+  font-size: var(--font-size-xs);
+}
