@@ -1,0 +1,423 @@
+{
+  "_notice": "開発用ダミー・内容の正確性は未検証",
+  "format": "lang-study-data",
+  "version": 1,
+  "meta": {
+    "exportedAt": "2026-11-14T00:00:00.000Z",
+    "appVersion": "0.1.0"
+  },
+  "profile": {
+    "uiLanguage": "ja",
+    "nativeLanguage": "ja",
+    "targetLanguage": "ms",
+    "goal": {
+      "purposeTags": ["travel"],
+      "purposeText": "旅行先であいさつと自己紹介をする",
+      "targetLevel": "A2",
+      "deadline": "2027-03-31",
+      "dailyMinutes": 20,
+      "studyDaysPerWeek": 6
+    }
+  },
+  "plan": {
+    "units": [
+      {
+        "id": "u01",
+        "title": "あいさつと自己紹介",
+        "canDo": "名前と出身を伝えられる",
+        "scenario": "初対面のあいさつ",
+        "keywords": ["あいさつ", "名前", "出身"],
+        "itemEstimate": 19,
+        "optional": false,
+        "status": "ready"
+      },
+      {
+        "id": "u02",
+        "title": "食べ物を注文する",
+        "canDo": "レストランで料理を注文できる",
+        "scenario": "レストランでの注文",
+        "keywords": ["注文", "料理", "メニュー"],
+        "itemEstimate": 20,
+        "optional": false,
+        "status": "planned"
+      },
+      {
+        "id": "u03",
+        "title": "道をたずねる",
+        "canDo": "目的地への道順をたずねられる",
+        "scenario": "街中での道案内",
+        "keywords": ["道", "方向", "場所"],
+        "itemEstimate": 20,
+        "optional": true,
+        "status": "planned"
+      }
+    ]
+  },
+  "content": {
+    "units": {
+      "u01": {
+        "version": 1,
+        "verified": false,
+        "generatedBy": {
+          "tool": "dummy-fixture",
+          "at": "2026-11-14T00:00:00.000Z"
+        },
+        "words": [
+          {
+            "id": "ms:saya",
+            "lemma": "saya",
+            "pos": "pronoun",
+            "reading": "",
+            "meaning": ["私"],
+            "tags": [],
+            "rel": [
+              {
+                "type": "synonym",
+                "id": "ms:aku"
+              }
+            ],
+            "uncertain": false,
+            "note": ""
+          },
+          {
+            "id": "ms:aku",
+            "lemma": "aku",
+            "pos": "pronoun",
+            "reading": "",
+            "meaning": ["私"],
+            "tags": [],
+            "rel": [],
+            "uncertain": false,
+            "note": ""
+          },
+          {
+            "id": "ms:nama",
+            "lemma": "nama",
+            "pos": "noun",
+            "reading": "",
+            "meaning": ["名前"],
+            "tags": [],
+            "rel": [
+              {
+                "type": "related",
+                "id": "ms:saya"
+              }
+            ],
+            "uncertain": false,
+            "note": ""
+          },
+          {
+            "id": "ms:dari",
+            "lemma": "dari",
+            "pos": "preposition",
+            "reading": "",
+            "meaning": ["から"],
+            "tags": [],
+            "rel": [
+              {
+                "type": "related",
+                "id": "ms:negara"
+              }
+            ],
+            "uncertain": false,
+            "note": ""
+          },
+          {
+            "id": "ms:negara",
+            "lemma": "negara",
+            "pos": "noun",
+            "reading": "",
+            "meaning": ["国"],
+            "tags": [],
+            "rel": [],
+            "uncertain": false,
+            "note": ""
+          },
+          {
+            "id": "ms:jepun",
+            "lemma": "Jepun",
+            "pos": "proper noun",
+            "reading": "",
+            "meaning": ["日本"],
+            "tags": ["country"],
+            "rel": [],
+            "uncertain": false,
+            "note": ""
+          },
+          {
+            "id": "ms:malaysia",
+            "lemma": "Malaysia",
+            "pos": "proper noun",
+            "reading": "",
+            "meaning": ["マレーシア"],
+            "tags": ["country"],
+            "rel": [],
+            "uncertain": false,
+            "note": ""
+          },
+          {
+            "id": "ms:indonesia",
+            "lemma": "Indonesia",
+            "pos": "proper noun",
+            "reading": "",
+            "meaning": ["インドネシア"],
+            "tags": ["country"],
+            "rel": [],
+            "uncertain": false,
+            "note": ""
+          },
+          {
+            "id": "ms:selamat",
+            "lemma": "selamat",
+            "pos": "adjective",
+            "reading": "",
+            "meaning": ["無事な"],
+            "tags": ["greeting"],
+            "rel": [],
+            "uncertain": false,
+            "note": ""
+          },
+          {
+            "id": "ms:pagi",
+            "lemma": "pagi",
+            "pos": "noun",
+            "reading": "",
+            "meaning": ["朝"],
+            "tags": [],
+            "rel": [
+              {
+                "type": "antonym",
+                "id": "ms:malam"
+              }
+            ],
+            "uncertain": false,
+            "note": ""
+          },
+          {
+            "id": "ms:malam",
+            "lemma": "malam",
+            "pos": "noun",
+            "reading": "",
+            "meaning": ["夜"],
+            "tags": [],
+            "rel": [],
+            "uncertain": false,
+            "note": ""
+          },
+          {
+            "id": "ms:datang",
+            "lemma": "datang",
+            "pos": "verb",
+            "reading": "",
+            "meaning": ["来る"],
+            "tags": [],
+            "rel": [
+              {
+                "type": "antonym",
+                "id": "ms:pergi"
+              }
+            ],
+            "uncertain": false,
+            "note": ""
+          },
+          {
+            "id": "ms:pergi",
+            "lemma": "pergi",
+            "pos": "verb",
+            "reading": "",
+            "meaning": ["行く"],
+            "tags": [],
+            "rel": [],
+            "uncertain": false,
+            "note": ""
+          },
+          {
+            "id": "ms:terima-kasih",
+            "lemma": "terima kasih",
+            "pos": "expression",
+            "reading": "",
+            "meaning": ["ありがとう"],
+            "tags": ["greeting"],
+            "rel": [],
+            "uncertain": false,
+            "note": ""
+          },
+          {
+            "id": "ms:salam",
+            "lemma": "salam",
+            "pos": "noun",
+            "reading": "",
+            "meaning": ["あいさつ"],
+            "tags": ["greeting"],
+            "rel": [
+              {
+                "type": "confusable",
+                "id": "ms:selamat"
+              }
+            ],
+            "uncertain": true,
+            "note": "語義と混同関係を確認するための開発用ダミー。内容の正確性は未検証。"
+          },
+          {
+            "id": "ms:khabar",
+            "lemma": "khabar",
+            "pos": "noun",
+            "reading": "",
+            "meaning": ["便り"],
+            "tags": [],
+            "rel": [],
+            "uncertain": false,
+            "note": ""
+          }
+        ],
+        "phrases": [
+          {
+            "id": "ph:dari-country",
+            "target": "Saya dari {country}.",
+            "meaning": "私は{country}出身です。",
+            "slots": {
+              "country": {
+                "tag": "country"
+              }
+            },
+            "fixed": false
+          },
+          {
+            "id": "ph:negara-country",
+            "target": "Negara saya {country}.",
+            "meaning": "私の国は{country}です。",
+            "slots": {
+              "country": {
+                "tag": "country"
+              }
+            },
+            "fixed": false
+          },
+          {
+            "id": "ph:selamat-pagi",
+            "target": "Selamat pagi!",
+            "meaning": "おはようございます！",
+            "slots": {},
+            "fixed": true
+          }
+        ],
+        "sentences": [
+          {
+            "id": "se:saya-dari-jepun",
+            "target": "Saya dari Jepun.",
+            "meaning": "私は日本出身です。",
+            "wordIds": ["ms:saya", "ms:dari", "ms:jepun"]
+          },
+          {
+            "id": "se:nama-saya",
+            "target": "Nama saya Taiyo.",
+            "meaning": "私の名前はタイヨウです。",
+            "wordIds": ["ms:nama", "ms:saya"]
+          },
+          {
+            "id": "se:selamat-pagi",
+            "target": "Selamat pagi!",
+            "meaning": "おはようございます！",
+            "wordIds": ["ms:selamat", "ms:pagi"]
+          },
+          {
+            "id": "se:negara-malaysia",
+            "target": "Negara saya Malaysia.",
+            "meaning": "私の国はマレーシアです。",
+            "wordIds": ["ms:negara", "ms:saya", "ms:malaysia"]
+          }
+        ],
+        "grammarNotes": [
+          {
+            "id": "gn:pronoun",
+            "appliesTo": ["ms:saya", "ms:aku"],
+            "title": "自己紹介の代名詞",
+            "hint": "「saya」と「aku」は「私」を表す語の例です。使う場面の違いは要確認です。"
+          },
+          {
+            "id": "gn:origin",
+            "appliesTo": ["ms:dari", "ph:dari-country"],
+            "title": "出身を伝える表現",
+            "hint": "「Saya dari {country}.」の国名を入れ替えて出身を伝える練習をします。"
+          }
+        ]
+      }
+    }
+  },
+  "progress": {
+    "fsrs": {
+      "ms:saya": {
+        "due": "2026-11-14T09:00:00.000Z",
+        "stability": 1.5,
+        "difficulty": 5,
+        "elapsedDays": 1,
+        "scheduledDays": 1,
+        "reps": 2,
+        "lapses": 0,
+        "state": 2,
+        "lastReview": "2026-11-13T09:00:00.000Z"
+      },
+      "ms:nama": {
+        "due": "2026-11-15T09:00:00.000Z",
+        "stability": 2,
+        "difficulty": 4.5,
+        "elapsedDays": 1,
+        "scheduledDays": 2,
+        "reps": 2,
+        "lapses": 0,
+        "state": 2,
+        "lastReview": "2026-11-13T09:00:00.000Z"
+      },
+      "ms:dari": {
+        "due": "2026-11-14T09:00:00.000Z",
+        "stability": 1,
+        "difficulty": 5.5,
+        "elapsedDays": 1,
+        "scheduledDays": 1,
+        "reps": 2,
+        "lapses": 0,
+        "state": 2,
+        "lastReview": "2026-11-13T09:00:00.000Z"
+      }
+    },
+    "unitProgress": {
+      "u01": {
+        "introducedItemIds": ["ms:saya", "ms:nama", "ms:dari"],
+        "completedStepIds": ["intro", "recognize"],
+        "wrongItemIds": ["ms:dari"],
+        "startedAt": "2026-11-12T09:00:00.000Z"
+      }
+    },
+    "xp": 30,
+    "streak": {
+      "days": 2,
+      "lastStudyDate": "2026-11-13"
+    },
+    "sessions": [
+      {
+        "id": "dummy-session-01",
+        "kind": "lesson",
+        "unitId": "u01",
+        "stepId": "intro",
+        "seed": 20501,
+        "startedAt": "2026-11-12T09:00:00.000Z",
+        "endedAt": "2026-11-12T09:10:00.000Z",
+        "answered": 3,
+        "correct": 3,
+        "xpGained": 10
+      },
+      {
+        "id": "dummy-session-02",
+        "kind": "lesson",
+        "unitId": "u01",
+        "stepId": "recognize",
+        "seed": 20502,
+        "startedAt": "2026-11-13T09:00:00.000Z",
+        "endedAt": "2026-11-13T09:15:00.000Z",
+        "answered": 6,
+        "correct": 5,
+        "xpGained": 20
+      }
+    ]
+  }
+}

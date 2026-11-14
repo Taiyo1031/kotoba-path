@@ -134,7 +134,8 @@ describe('データスキーマ', () => {
     }
     const result = PhraseSchema.safeParse(input)
     expect(result.success, `入力: ${JSON.stringify(input)}`).toBe(false)
-    if (!result.success) expect(result.error.issues.map((issue) => issue.path)).toEqual([['target']])
+    if (!result.success)
+      expect(result.error.issues.map((issue) => issue.path)).toEqual([['target']])
   })
 
   it('封筒の正常値と異常値を検査する', () => {

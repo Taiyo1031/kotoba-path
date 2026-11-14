@@ -1,0 +1,37 @@
+{
+  "_notice": "開発用ダミー・内容の正確性は未検証",
+  "format": "lang-study-skeleton",
+  "version": 1,
+  "units": [
+    {
+      "id": "u01",
+      "title": "あいさつと自己紹介",
+      "canDo": "名前と出身を伝えられる",
+      "scenario": "初対面のあいさつ",
+      "keywords": ["あいさつ", "名前", "出身"],
+      "itemEstimate": 19,
+      "optional": false,
+      "status": "planned"
+    },
+    {
+      "id": "u02",
+      "title": "食べ物を注文する",
+      "canDo": "レストランで料理を注文できる",
+      "scenario": "レストランでの注文",
+      "keywords": ["注文", "料理", "メニュー"],
+      "itemEstimate": 20,
+      "optional": false,
+      "status": "planned"
+    },
+    {
+      "id": "u03",
+      "title": "道をたずねる",
+      "canDo": "目的地への道順をたずねられる",
+      "scenario": "街中での道案内",
+      "keywords": ["道", "方向", "場所"],
+      "itemEstimate": 20,
+      "optional": true,
+      "status": "planned"
+    }
+  ]
+}
