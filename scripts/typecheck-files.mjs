@@ -9,10 +9,14 @@ if (files.length === 0) {
   process.exit(2)
 }
 
-const result = spawnSync('npx', ['tsc', '-p', 'tsconfig.app.json', '--noEmit', '--pretty', 'false'], {
-  encoding: 'utf8',
-  shell: true,
-})
+const result = spawnSync(
+  'npx',
+  ['tsc', '-p', 'tsconfig.app.json', '--noEmit', '--pretty', 'false'],
+  {
+    encoding: 'utf8',
+    shell: true,
+  },
+)
 const output = `${result.stdout ?? ''}${result.stderr ?? ''}`
 const lines = output.split('\n').map((l) => l.replaceAll('\r', ''))
 
