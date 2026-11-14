@@ -1,0 +1,7 @@
+dist
+coverage
+.tasks
+.lmstudio
+public/schema
+package-lock.json
+docs/spec-prompt.md

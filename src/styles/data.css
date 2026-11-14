@@ -1,0 +1,65 @@
+.data-sections {
+  display: grid;
+  gap: var(--space-8);
+}
+.data-card {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.data-card > button {
+  justify-self: start;
+}
+.data-card textarea {
+  width: 100%;
+  resize: vertical;
+  font-family: monospace;
+}
+.data-card label {
+  display: grid;
+  gap: var(--space-2);
+}
+.data-card p {
+  margin: 0;
+}
+.data-actions,
+.data-unit-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+.data-unit-list {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+.data-warning {
+  background: var(--color-accent-soft);
+  border-left: 0.25rem solid var(--color-accent-strong);
+  padding: var(--space-3);
+}
+.data-error {
+  background: var(--color-danger-soft);
+  border-left: 0.25rem solid var(--color-danger-strong);
+  padding: var(--space-3);
+}
+.data-card .data-danger {
+  color: var(--color-text-strong);
+  background: var(--color-danger-soft);
+  border-color: var(--color-danger-strong);
+}
+.data-card button[aria-pressed='true'] {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary-strong);
+}
+.data-card summary {
+  cursor: pointer;
+  padding-block: var(--space-2);
+}
