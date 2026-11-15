@@ -7,6 +7,7 @@ import { UI_LANGUAGES, useI18n } from '../i18n'
 import { ROUTES } from '../routes'
 import { getAppStore } from '../db'
 import { useAppState } from '../state/appState'
+import { GoalSettings } from '../components/GoalSettings'
 import '../styles/settings.css'
 
 function parseDailyGoal(raw: string): number | null {
@@ -197,6 +198,8 @@ export function SettingsPage() {
           </p>
         )}
       </section>
+
+      <GoalSettings />
 
       <section className="settings-section">
         <div className="settings-field settings-checkbox-field">

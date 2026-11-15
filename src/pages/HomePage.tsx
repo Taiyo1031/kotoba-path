@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { getNow, getToday } from '../app/clock'
 import { buildHomeView } from '../app/home'
@@ -112,9 +113,35 @@ export function HomePage() {
     reviewsDoneToday: 0,
     lastBackupAt,
   })
+  const percent = Math.round(view.goal.ratio * 100)
+  const ringStyle: CSSProperties & Record<'--p', number> = { '--p': percent }
   return (
     <div className="page home-page">
       <h1 className="page-title">{t('page.home')}</h1>
+      <section className="home-goal" aria-labelledby="home-goal-title">
+        <h2 id="home-goal-title">{t('home.goal.title')}</h2>
+        <div
+          className="home-goal-ring"
+          role="img"
+          aria-label={t('home.goal.percent', { percent })}
+          style={ringStyle}
+        >
+          <span>{percent}%</span>
+        </div>
+        <div>
+          <p>{t('home.goal.deadline', { date: view.goal.deadline })}</p>
+          <p>
+            {view.goal.daysLeft >= 0
+              ? t('home.goal.daysLeft', { days: view.goal.daysLeft })
+              : t('home.goal.overdue')}
+          </p>
+          <p>{t('home.goal.words', { done: view.goal.introduced, total: view.goal.total })}</p>
+          <p>{t(`home.pace.${view.pace.status}`)}</p>
+        </div>
+        <Link className="button" to={ROUTES.settings}>
+          {t('home.goal.edit')}
+        </Link>
+      </section>
       <div className="home-summary">
         <div className="home-summary-card">
           <span aria-hidden="true" className={view.streakDays > 0 ? 'kp-anim-pulse' : undefined}>

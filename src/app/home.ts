@@ -8,6 +8,7 @@ import { evaluatePace, isUnrealisticDeadline } from '../engine/pacingStatus'
 import { isDue } from '../engine/fsrsWrapper'
 import { effectiveStreakDays } from '../engine/game'
 import { getBackupStatus } from '../io/backup'
+import { daysLeft } from './goal'
 
 export interface HomeUnitRow {
   id: string
@@ -27,6 +28,14 @@ export interface HomeUnitRow {
 }
 
 export interface HomeView {
+  goal: {
+    deadline: string
+    /** 期限までの残り日数(今日なら0、過去なら負) */
+    daysLeft: number
+    introduced: number
+    total: number
+    ratio: number
+  }
   today: string
   units: HomeUnitRow[]
   nextUnitId: string | null
@@ -155,6 +164,13 @@ export function buildHomeView(
 
   return {
     today,
+    goal: {
+      deadline,
+      daysLeft: daysLeft(today, deadline),
+      introduced: actualCumulative,
+      total,
+      ratio: total === 0 ? 0 : Math.max(0, Math.min(1, actualCumulative / total)),
+    },
     units: rows,
     nextUnitId,
     streakDays: effectiveStreakDays(streak, today),

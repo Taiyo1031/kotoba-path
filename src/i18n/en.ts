@@ -278,4 +278,23 @@ export const en: Record<keyof typeof ja, string> = {
   'words.empty.action': 'Go to Data',
   'home.words': 'Word map',
   'home.words.summary': '{seen} studied, {mature} retained',
+
+  // 目標と期限(P3)用の文言
+  'goal.section.title': 'Learning goal',
+  'goal.deadline.modeDate': 'Pick a date',
+  'goal.deadline.modeRelative': 'In N months',
+  'goal.deadline.mode.label': 'How to set the deadline',
+  'goal.deadline.months': 'In {months} mo',
+  'goal.deadline.preview': 'Deadline: {date}',
+  'goal.deadline.remaining': '{days} days left (about {months} mo)',
+  'goal.deadline.invalid': 'The deadline must be after today.',
+  'goal.saved': 'Saved',
+  'goal.error': "Couldn't save.",
+  'home.goal.title': 'Goal',
+  'home.goal.deadline': 'Deadline {date}',
+  'home.goal.daysLeft': '{days} days left',
+  'home.goal.overdue': 'Past the deadline',
+  'home.goal.words': '{done}/{total} items introduced',
+  'home.goal.percent': 'Progress {percent}%',
+  'home.goal.edit': 'Edit goal',
 } as const

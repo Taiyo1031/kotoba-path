@@ -9,6 +9,7 @@
   gap: var(--space-4);
 }
 .home-summary-card,
+.home-goal,
 .home-unit-card,
 .home-backup {
   padding: var(--space-4);
@@ -16,6 +17,40 @@
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
   overflow-wrap: anywhere;
+}
+.home-goal {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-4);
+}
+.home-goal h2 {
+  grid-column: 1 / -1;
+}
+.home-goal-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 5rem;
+  height: 5rem;
+  border-radius: var(--radius-pill);
+  background: conic-gradient(var(--color-primary) calc(var(--p) * 1%), var(--color-border) 0);
+}
+.home-goal-ring::before {
+  content: '';
+  position: absolute;
+  inset: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+}
+.home-goal-ring > span {
+  position: relative;
+}
+@media (max-width: 30rem) {
+  .home-goal {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
 }
 .home-unit-next {
   outline: solid var(--color-primary);

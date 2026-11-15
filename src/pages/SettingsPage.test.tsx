@@ -109,6 +109,18 @@ beforeEach(() => {
 })
 
 describe('SettingsPage', () => {
+  it.each([true, false])('shows learning goals only with data: %s', (hasData) => {
+    useAppState.setState({ data: hasData ? makeData() : null })
+    renderPage()
+    const heading = screen.queryByRole('heading', {
+      name: createTranslator('ja')('goal.section.title'),
+    })
+    expect(
+      heading !== null,
+      `入力: data=${hasData}、期待値: ${hasData}、実際: ${heading !== null}`,
+    ).toBe(hasData)
+  })
+
   it('見出しとラベルの重複をなくし、各入力をラベルから到達できる', () => {
     setTtsVoices([])
     useAppState.setState({

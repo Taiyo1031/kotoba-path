@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
@@ -7,6 +7,9 @@ import { I18nProvider } from '../i18n'
 import { useAppState } from '../state/appState'
 import { StudyDataSchema } from '../schema'
 import { ROUTES } from '../routes'
+import { getToday, setVirtualDate } from '../app/clock'
+import { defaultDeadline } from '../app/survey'
+import { deadlineFromMonths } from '../app/goal'
 
 const dbMock = vi.hoisted(() => {
   const saveStudyData = vi.fn()
@@ -39,6 +42,7 @@ function renderWithProviders(ui: ReactNode) {
 }
 
 beforeEach(() => {
+  setVirtualDate('2026-11-15')
   dbMock.saveStudyData.mockClear()
   useAppState.setState({
     status: 'ready',
@@ -46,6 +50,10 @@ beforeEach(() => {
     lastBackupAt: null,
     reload: async () => {},
   })
+})
+
+afterEach(() => {
+  setVirtualDate(null)
 })
 
 describe('WelcomePage', () => {
@@ -162,7 +170,43 @@ describe('WelcomePage', () => {
     ).not.toBeNull()
   })
 
-  it('blocks finish with past deadline and does not save', async () => {
+  it.each(['2027-03-15', '2027-03-16'])(
+    'blocks expired deadline when today is %s',
+    async (today) => {
+      const user = userEvent.setup()
+      renderWithProviders(<WelcomePage />)
+
+      await user.click(screen.getByRole('button', { name: '次へ' }))
+      await user.click(screen.getByRole('checkbox', { name: '旅行' }))
+      await user.click(screen.getByRole('button', { name: '次へ' }))
+
+      const deadline = screen.getByLabelText(/目標達成期限/)
+      fireEvent.change(deadline, { target: { value: '2027-03-15' } })
+      setVirtualDate(today)
+
+      await user.click(screen.getByRole('button', { name: '骨組みのプロンプトを作る' }))
+
+      expect(
+        screen
+          .queryAllByRole('alert')
+          .map((alert) => alert.textContent)
+          .join(' '),
+        `入力: deadline=2027-03-15, today=${today} / 期待値: 期限エラー`,
+      ).toContain('期限は今日より後でください')
+      expect(
+        dbMock.saveStudyData,
+        '入力: past deadline finish / 期待値: not called',
+      ).not.toHaveBeenCalled()
+
+      fireEvent.change(deadline, { target: { value: '2027-04-01' } })
+      expect(
+        screen.queryAllByRole('alert').map((alert) => alert.textContent),
+        '入力: 期限を2027-04-01に変更 / 期待値: エラーなし',
+      ).toEqual([])
+    },
+  )
+
+  it.each(['date', 'relative'] as const)('saves valid answers with %s deadline', async (mode) => {
     const user = userEvent.setup()
     renderWithProviders(<WelcomePage />)
 
@@ -170,31 +214,20 @@ describe('WelcomePage', () => {
     await user.click(screen.getByRole('checkbox', { name: '旅行' }))
     await user.click(screen.getByRole('button', { name: '次へ' }))
 
-    const deadline = screen.getByLabelText(/目標達成期限/)
-    fireEvent.change(deadline, { target: { value: '2000-01-01' } })
-
-    await user.click(screen.getByRole('button', { name: '骨組みのプロンプトを作る' }))
-
+    const deadline = screen.getByLabelText('目標達成期限') as HTMLInputElement
+    const expectedDefault = defaultDeadline(getToday())
     expect(
-      screen.queryByRole('alert'),
-      '入力: past deadline finish / 期待値: alert exists / 実際: null',
-    ).not.toBeNull()
-    expect(
-      dbMock.saveStudyData,
-      '入力: past deadline finish / 期待値: not called',
-    ).not.toHaveBeenCalled()
-  })
+      { type: deadline.type, value: deadline.value },
+      `入力: 目標ステップ初期表示 / 期待値: date, ${expectedDefault}`,
+    ).toEqual({ type: 'date', value: expectedDefault })
 
-  it('saves valid answers and navigates to data route', async () => {
-    const user = userEvent.setup()
-    renderWithProviders(<WelcomePage />)
-
-    await user.click(screen.getByRole('button', { name: '次へ' }))
-    await user.click(screen.getByRole('checkbox', { name: '旅行' }))
-    await user.click(screen.getByRole('button', { name: '次へ' }))
-
-    const deadline = screen.getByLabelText(/目標達成期限/)
-    fireEvent.change(deadline, { target: { value: '2099-12-31' } })
+    const expectedDeadline = mode === 'date' ? '2099-12-31' : deadlineFromMonths(getToday(), 6)
+    if (mode === 'date') {
+      fireEvent.change(deadline, { target: { value: expectedDeadline } })
+    } else {
+      await user.click(screen.getByRole('button', { name: '○ヶ月後で指定' }))
+      await user.click(screen.getByRole('button', { name: '6ヶ月後' }))
+    }
 
     await user.click(screen.getByRole('button', { name: '骨組みのプロンプトを作る' }))
 
@@ -221,7 +254,7 @@ describe('WelcomePage', () => {
     const profile = (parsed as { profile?: unknown }).profile as
       | {
           targetLanguage?: string
-          goal?: { purposeTags?: string[] }
+          goal?: { purposeTags?: string[]; deadline?: string }
         }
       | undefined
     expect(
@@ -232,6 +265,10 @@ describe('WelcomePage', () => {
       profile?.goal?.purposeTags,
       `入力: saved purposeTags / 期待値: travel included / 実際: ${JSON.stringify(profile?.goal?.purposeTags)}`,
     ).toContain('travel')
+    expect(
+      profile?.goal?.deadline,
+      `入力: ${mode} / 期待値: ${expectedDeadline} / 実際: ${profile?.goal?.deadline}`,
+    ).toBe(expectedDeadline)
 
     await waitFor(() => {
       expect(

@@ -116,6 +116,47 @@ function deepFreeze(value: unknown): void {
 }
 
 describe('buildHomeView', () => {
+  it.each([
+    { deadline: '2026-11-20', expectedDays: 5 },
+    { deadline: '2026-11-15', expectedDays: 0 },
+    { deadline: '2026-11-14', expectedDays: -1 },
+  ])('reports goal values for $deadline', ({ deadline, expectedDays }) => {
+    const data = makeData()
+    data.profile.goal.deadline = deadline
+    const input = makeInput({ today: '2026-11-15' })
+    check(
+      { data, input },
+      { deadline, daysLeft: expectedDays, introduced: 2, total: 53, ratio: 2 / 53 },
+      buildHomeView(data, input).goal,
+    )
+  })
+
+  it.each([
+    { introduced: 0, total: 53, ratio: 0 },
+    { introduced: 53, total: 53, ratio: 1 },
+    { introduced: 54, total: 53, ratio: 1 },
+    { introduced: 0, total: 0, ratio: 0 },
+  ])('bounds goal ratio for $introduced/$total', ({ introduced, total, ratio }) => {
+    const data = makeData()
+    if (total === 0) data.plan.units = []
+    data.progress.unitProgress.u1!.introducedItemIds = Array.from(
+      { length: introduced },
+      (_, index) => `item-${index}`,
+    )
+    const input = makeInput()
+    check(
+      { data, input },
+      {
+        deadline: data.profile.goal.deadline,
+        daysLeft: 7,
+        introduced,
+        total,
+        ratio,
+      },
+      buildHomeView(data, input).goal,
+    )
+  })
+
   it('preserves plan order and counts content and distinct existing completed steps', () => {
     const data = makeData()
     const input = makeInput()

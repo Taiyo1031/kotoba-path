@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useT, useI18n } from '../i18n'
 import { TARGET_LANGUAGES, DEFAULT_UI_LANGUAGE } from '../config/languages'
 import { getToday } from '../app/clock'
+import { DeadlineField } from '../components/DeadlineField'
 import {
   PURPOSE_TAGS,
   LEVEL_OPTIONS,
@@ -138,14 +139,13 @@ export function SurveyForm({ answers, onChange, step, errors }: SurveyFormProps)
   return (
     <section className="welcome-step" aria-label={t('welcome.step.goal')}>
       <h2 className="welcome-step-title">{t('welcome.step.goal')}</h2>
-      <label className="welcome-field">
-        <span>{t('welcome.goal.deadline')}</span>
-        <input
-          type="date"
-          value={answers.deadline}
-          onChange={(event) => onChange({ ...answers, deadline: event.target.value })}
-        />
-      </label>
+      <DeadlineField
+        id="welcome-deadline"
+        label={t('welcome.goal.deadline')}
+        value={answers.deadline}
+        today={getToday()}
+        onChange={(deadline) => onChange({ ...answers, deadline })}
+      />
       <fieldset className="welcome-fieldset">
         <legend className="welcome-legend">{t('welcome.goal.level')}</legend>
         <div className="welcome-options">

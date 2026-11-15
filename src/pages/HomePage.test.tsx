@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { setOnboarded } from '../app/onboarding'
+import { buildHomeView } from '../app/home'
 import { buildWordStats } from '../app/wordStats'
 import { createTranslator, I18nProvider } from '../i18n'
 import { StudyDataSchema } from '../schema'
@@ -90,6 +91,53 @@ afterEach(() => {
 })
 
 describe('HomePage', () => {
+  it.each([
+    { deadline: '2026-11-20', days: 5 },
+    { deadline: '2026-11-15', days: 0 },
+    { deadline: '2026-11-14', days: -1 },
+  ])('shows the goal card for $deadline', ({ deadline, days }) => {
+    const data = makeData()
+    data.profile.goal.deadline = deadline
+    data.plan.units.forEach((unit) => {
+      unit.itemEstimate = 1
+    })
+    data.progress.unitProgress.u1!.introducedItemIds = ['w1']
+    useAppState.setState({ data })
+    const { container } = show()
+    const input = { data, today: '2026-11-15' }
+    const card = screen.queryByRole('region', { name: t('home.goal.title') })
+    check(input, true, card !== null)
+    if (!card) return
+    const goal = within(card)
+    check(input, t('home.goal.title'), goal.queryByRole('heading')?.textContent)
+    check(input, true, goal.queryByText(t('home.goal.deadline', { date: deadline })) !== null)
+    const remaining = days >= 0 ? t('home.goal.daysLeft', { days }) : t('home.goal.overdue')
+    check(input, true, goal.queryByText(remaining) !== null)
+    check(input, true, goal.queryByText(t('home.goal.words', { done: 1, total: 3 })) !== null)
+    const ring = goal.queryByRole('img')
+    check(input, '進捗 33%', ring?.getAttribute('aria-label'))
+    check(input, '33%', ring?.textContent)
+    check(input, '33', (ring as HTMLElement | null)?.style.getPropertyValue('--p'))
+    check(
+      input,
+      '/settings',
+      goal.queryByRole('link', { name: '目標を変える' })?.getAttribute('href'),
+    )
+    check(input, null, goal.queryByRole('status'))
+    check(input, true, card.nextElementSibling === container.querySelector('.home-summary'))
+    const view = buildHomeView(data, {
+      today: '2026-11-15',
+      now: new Date(now),
+      dailyGoal: 10,
+      reviewsDoneToday: 0,
+      lastBackupAt: null,
+    })
+    const pace = t(`home.pace.${view.pace.status}`)
+    check(input, 1, goal.queryAllByText(pace).length)
+    const summary = container.querySelector('.home-summary')!
+    check(input, 1, within(summary as HTMLElement).queryAllByText(pace).length)
+  })
+
   it.each(['unseen', 'mature'] as const)('shows the word map with %s word counts', (state) => {
     const data = makeData()
     if (state === 'mature') {

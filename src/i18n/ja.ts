@@ -276,4 +276,23 @@ export const ja = {
   'words.empty.action': 'データ管理へ',
   'home.words': '単語マップ',
   'home.words.summary': '学習した{seen}語・定着{mature}語',
+
+  // 目標と期限(P3)用の文言
+  'goal.section.title': '学習目標',
+  'goal.deadline.modeDate': '日付で指定',
+  'goal.deadline.modeRelative': '○ヶ月後で指定',
+  'goal.deadline.mode.label': '期限の指定方法',
+  'goal.deadline.months': '{months}ヶ月後',
+  'goal.deadline.preview': '期限: {date}',
+  'goal.deadline.remaining': 'あと{days}日(約{months}ヶ月)',
+  'goal.deadline.invalid': '期限は、今日より後の日付にしてください。',
+  'goal.saved': '保存しました',
+  'goal.error': '保存できませんでした。',
+  'home.goal.title': '目標',
+  'home.goal.deadline': '期限 {date}',
+  'home.goal.daysLeft': 'あと{days}日',
+  'home.goal.overdue': '期限を過ぎています',
+  'home.goal.words': '導入済み {done}/{total}項目',
+  'home.goal.percent': '進捗 {percent}%',
+  'home.goal.edit': '目標を変える',
 } as const
