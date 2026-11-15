@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { I18nProvider, createTranslator } from '../../i18n'
 import { StudyDataSchema } from '../../schema'
 import type { StudyData } from '../../schema'
 import { setVirtualDate } from '../../app/clock'
 import { useAppState } from '../../state/appState'
+import { buildSkeletonPrompt } from '../../prompts'
 import { PromptPanel } from './PromptPanel'
 
 const t = createTranslator('ja')
@@ -73,9 +74,91 @@ beforeEach(() => {
 
 afterEach(() => {
   setVirtualDate(null)
+  vi.unstubAllGlobals()
+  vi.restoreAllMocks()
 })
 
 describe('PromptPanel', () => {
+  it('renders the complete skeleton builder output in a read-only preview', () => {
+    const data = makeData([], [])
+    data.profile.targetLanguage = 'ms'
+    useAppState.setState({ data })
+    setVirtualDate('2030-01-02')
+    const { container } = show()
+    const preview = screen.getByRole<HTMLTextAreaElement>('textbox')
+    const expected = buildSkeletonPrompt({
+      profile: {
+        ...data.profile.goal,
+        targetLanguage: 'ms',
+        nativeLanguage: 'ja',
+        targetLanguageName: 'マレー語',
+        nativeLanguageName: '日本語',
+      },
+      today: '2030-01-02',
+    })
+    check({ profile: data.profile, today: '2030-01-02' }, expected, preview.value)
+    for (const text of [
+      '【役割】',
+      '【スキーマ】',
+      'format: "lang-study-skeleton"',
+      '今日の日付: 2030-01-02',
+    ]) {
+      check({ mode: 'skeleton', text }, text, preview.value.includes(text) ? text : preview.value)
+    }
+    check('preview selector', true, container.querySelector('textarea#prompt-preview') === preview)
+    check('preview readOnly', true, preview.readOnly)
+    check('preview rows', 14, preview.rows)
+  })
+
+  it('renders unit instructions, version and the selected part', async () => {
+    const user = userEvent.setup()
+    useAppState.setState({ data: makeData(['u1', 'u2'], ['u1']) })
+    show()
+    const preview = screen.getByRole<HTMLTextAreaElement>('textbox')
+    for (const text of ['【読み(reading)】', '【IDの規則】', '【自己チェック】', 'u2']) {
+      check(
+        { mode: 'unit', unitId: 'u2', text },
+        text,
+        preview.value.includes(text) ? text : preview.value,
+      )
+    }
+    check(
+      'unit prompt ending',
+      'プロンプトの版: 2',
+      preview.value.slice(-'プロンプトの版: 2'.length),
+    )
+    await user.selectOptions(screen.getByLabelText(t('data.prompt.part')), 'A')
+    const text = '今回はパートAです'
+    check({ unitId: 'u2', part: 'A' }, text, preview.value.includes(text) ? text : preview.value)
+  })
+
+  it('copies exactly the preview text', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    vi.stubGlobal('navigator', { clipboard: { writeText } })
+    useAppState.setState({ data: makeData([], []) })
+    show()
+    const preview = screen.getByRole<HTMLTextAreaElement>('textbox')
+    await user.click(screen.getByRole('button', { name: t('data.copy') }))
+    check('copy preview', [[preview.value]], writeText.mock.calls)
+    check('copy status', t('data.copied'), screen.getByRole('status').textContent)
+  })
+
+  it('selects the preview and shows the fallback message when copying fails', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn().mockRejectedValue(new Error('clipboard unavailable'))
+    vi.stubGlobal('navigator', { clipboard: { writeText } })
+    useAppState.setState({ data: makeData([], []) })
+    const { container } = show()
+    const preview = screen.getByRole<HTMLTextAreaElement>('textbox')
+    const select = vi.spyOn(preview, 'select')
+    await user.click(screen.getByRole('button', { name: t('data.copy') }))
+    check('rejected clipboard input', [[preview.value]], writeText.mock.calls)
+    check('fallback preview selection', 1, select.mock.calls.length)
+    check('fallback uses existing preview', 1, container.querySelectorAll('textarea').length)
+    check('fallback message', t('data.copyFallback'), screen.getByRole('status').textContent)
+  })
+
   it('shows the skeleton banner and default skeleton mode when there are no units', () => {
     const data = makeData([], [])
     useAppState.setState({ status: 'ready', data, lastBackupAt: null, reload: async () => {} })
