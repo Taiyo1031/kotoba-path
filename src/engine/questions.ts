@@ -59,13 +59,50 @@ function firstAssociatedSentence(
   return undefined
 }
 
-function buildTypingQuestion(itemId: string, word: Word): Question {
+function normalizeMeaning(text: string): string {
+  return text.trim().toLowerCase()
+}
+
+function collectAcceptedAlternatives(word: Word, context: QuestionContext): string[] {
+  const target = normalizeMeaning(word.meaning[0] ?? '')
+
+  const seenIds = new Set<string>()
+  const candidates: Word[] = []
+  for (const candidate of [...context.words, ...context.pool]) {
+    if (!seenIds.has(candidate.id)) {
+      seenIds.add(candidate.id)
+      candidates.push(candidate)
+    }
+  }
+
+  const answerKey = normalizeMeaning(word.lemma)
+  const seenLemmas = new Set<string>()
+  const accepted: string[] = []
+  for (const candidate of candidates) {
+    if (candidate.id === word.id) {
+      continue
+    }
+    if (normalizeMeaning(candidate.meaning[0] ?? '') !== target) {
+      continue
+    }
+    const lemmaKey = normalizeMeaning(candidate.lemma)
+    if (lemmaKey === answerKey || seenLemmas.has(lemmaKey)) {
+      continue
+    }
+    seenLemmas.add(lemmaKey)
+    accepted.push(candidate.lemma)
+  }
+
+  return accepted
+}
+
+function buildTypingQuestion(itemId: string, word: Word, context: QuestionContext): Question {
   return {
     format: 'typing',
     itemId,
     prompt: word.meaning[0] ?? '',
     answer: word.lemma,
-    accepted: [],
+    accepted: collectAcceptedAlternatives(word, context),
   }
 }
 
@@ -104,7 +141,7 @@ export function buildQuestion(itemId: string, level: Level, context: QuestionCon
 
   // 段階 2 で例文は関連しているが語が見つからず cloze を作れない場合は、typing に落とす。
   if (level === 2 && associatedSentence !== undefined && usableSentence === undefined) {
-    return buildTypingQuestion(itemId, word)
+    return buildTypingQuestion(itemId, word, context)
   }
 
   const choice = pickFormat(
@@ -123,7 +160,7 @@ export function buildQuestion(itemId: string, level: Level, context: QuestionCon
   }
 
   if (choice.format === 'typing') {
-    return buildTypingQuestion(itemId, word)
+    return buildTypingQuestion(itemId, word, context)
   }
 
   if (choice.format === 'tiles' && usableSentence !== undefined) {
@@ -153,7 +190,7 @@ export function buildQuestion(itemId: string, level: Level, context: QuestionCon
     }
 
     // cloze を作れなかった場合は、段階 1 の typing に落とす。
-    return buildTypingQuestion(itemId, word)
+    return buildTypingQuestion(itemId, word, context)
   }
 
   return buildMcq(word, 'foreignToNative', {

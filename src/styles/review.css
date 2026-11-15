@@ -1,0 +1,14 @@
+.review-page {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.review-page > .button {
+  justify-self: start;
+}
+
+.review-start-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -158,4 +158,14 @@ describe('TilesView', () => {
     expect(tile.disabled, `期待: disabled`).toBe(true)
     expect(check.disabled, `期待: disabled`).toBe(true)
   })
+
+  it('does not have role="status" in judgement area', () => {
+    renderTilesView({ judgement: { correct: false, close: false, correctText: 'cats' } })
+
+    const judgement = screen.getByText('不正解')
+    expect(
+      judgement.getAttribute('role'),
+      `入力: judgementあり / 期待値: role="status" なし / 実際: ${judgement.getAttribute('role')}`,
+    ).toBeNull()
+  })
 })

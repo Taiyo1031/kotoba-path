@@ -105,7 +105,7 @@ export function ClozeView(props: QuestionViewProps<ClozeQuestion>): JSX.Element 
         <p className="lq-instruction">{t('lesson.fill')}</p>
       ) : (
         <label className="lq-instruction" htmlFor={inputId}>
-          {t('lesson.fill')}
+          {t('lesson.fill.typing')}
         </label>
       )}
 
@@ -179,7 +179,7 @@ export function ClozeView(props: QuestionViewProps<ClozeQuestion>): JSX.Element 
       )}
 
       {judgement ? (
-        <div className="lq-feedback" role="status" aria-live="polite">
+        <div className="lq-feedback">
           <p>{judgement.correct ? t('lesson.correct') : t('lesson.incorrect')}</p>
           {judgement.close ? (
             <div className="lq-hint">

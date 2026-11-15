@@ -92,6 +92,30 @@ function judge(question: Question, response: Response, expected: Judgement): voi
   equal(judgeResponse(question, response), expected, { question, response })
 }
 
+function makeTestWord(id: string, lemma: string, meaning: string[]): Word {
+  return {
+    id,
+    lemma,
+    meaning,
+    pos: 'noun',
+    reading: '',
+    tags: [],
+    rel: [],
+    uncertain: false,
+    note: '',
+  }
+}
+
+function makeTypingContext(words: Word[]): QuestionContext {
+  return makeContext({
+    words,
+    pool: words,
+    unitWordIds: new Set(words.map((word) => word.id)),
+    learnedWordIds: new Set(),
+    sentences: [],
+  })
+}
+
 afterEach(() => vi.restoreAllMocks())
 
 describe('buildQuestion', () => {
@@ -115,7 +139,7 @@ describe('buildQuestion', () => {
     assertQuestion(question, format, 'w-apple')
     if (question.format === 'mcq') {
       equal(question.direction, 'nativeToForeign', { random, question })
-      equal(question.prompt, 'りんご', { question })
+      equal(question.prompt, 'りんご', { random, question })
       equal(question.options.find((option) => option.id === question.correctId)?.text, 'apple', {
         question,
       })
@@ -133,9 +157,9 @@ describe('buildQuestion', () => {
       )
     } else if (question.format === 'tiles') {
       equal(question.answer, ['I', 'eat', 'an', 'apple'], { random, question })
-      equal(question.prompt, '私はりんごを食べます。', { question })
-      equal(question.tiles.length, 6, { question })
-      equal(question.tiles.filter((tile) => tile === 'apple').length, 1, { question })
+      equal(question.prompt, '私はりんごを食べます。', { random, question })
+      equal(question.tiles.length, 6, { random, question })
+      equal(question.tiles.filter((tile) => tile === 'apple').length, 1, { random, question })
     }
   })
 
@@ -310,6 +334,96 @@ describe('buildQuestion', () => {
       }
     }
     equal(course, snapshot, { operation: 'buildQuestion', course: snapshot })
+  })
+
+  it('typing の accepted は同じ意味の語を含む', () => {
+    const saya = makeTestWord('w-saya', 'saya', ['私'])
+    const aku = makeTestWord('w-aku', 'aku', ['私'])
+    const context = makeTypingContext([saya, aku])
+
+    const sayaQuestion = buildQuestion('w-saya', 1, { ...context, rng: () => 0.5 })
+    assertQuestion(sayaQuestion, 'typing', 'w-saya')
+    equal(sayaQuestion.accepted, ['aku'], { itemId: 'w-saya', words: [saya, aku] })
+
+    const akuQuestion = buildQuestion('w-aku', 1, { ...context, rng: () => 0.5 })
+    assertQuestion(akuQuestion, 'typing', 'w-aku')
+    equal(akuQuestion.accepted, ['saya'], { itemId: 'w-aku', words: [saya, aku] })
+  })
+
+  it('同じ意味の語が無い単語は typing の accepted が空配列', () => {
+    const apple = makeTestWord('w-apple', 'apple', ['りんご'])
+    const banana = makeTestWord('w-banana', 'banana', ['バナナ'])
+    const context = makeTypingContext([apple, banana])
+
+    const question = buildQuestion('w-apple', 1, { ...context, rng: () => 0.5 })
+    assertQuestion(question, 'typing', 'w-apple')
+    equal(question.accepted, [], { itemId: 'w-apple', words: [apple, banana] })
+  })
+
+  it('大文字小文字・前後の空白の違いがあっても同じ意味として扱う', () => {
+    const i = makeTestWord('w-i', 'I', ['me'])
+    const me = makeTestWord('w-me', 'me', ['  ME '])
+    const context = makeTypingContext([i, me])
+
+    const question = buildQuestion('w-i', 1, { ...context, rng: () => 0.5 })
+    assertQuestion(question, 'typing', 'w-i')
+    equal(question.accepted, ['me'], { itemId: 'w-i', words: [i, me] })
+
+    const meQuestion = buildQuestion('w-me', 1, { ...context, rng: () => 0.5 })
+    assertQuestion(meQuestion, 'typing', 'w-me')
+    equal(meQuestion.accepted, ['I'], { itemId: 'w-me', words: [i, me] })
+  })
+
+  it('accepted は context.words の順 → context.pool の順で重複を除去する', () => {
+    const answer = makeTestWord('w-answer', 'answer', ['意味'])
+    const alpha = makeTestWord('w-alpha', 'alpha', ['意味'])
+    const beta = makeTestWord('w-beta', 'beta', ['意味'])
+    const context = makeContext({
+      words: [answer, alpha],
+      pool: [beta, alpha],
+      unitWordIds: new Set([answer.id, alpha.id, beta.id]),
+      learnedWordIds: new Set(),
+      sentences: [],
+    })
+
+    const question = buildQuestion('w-answer', 1, { ...context, rng: () => 0.5 })
+    assertQuestion(question, 'typing', 'w-answer')
+    equal(question.accepted, ['alpha', 'beta'], { itemId: 'w-answer', context })
+  })
+
+  it('accepted に answer と同じ lemma は含めない', () => {
+    const saya = makeTestWord('w-saya', 'saya', ['私'])
+    const aku = makeTestWord('w-aku', 'aku', ['私'])
+    const sayaAlias = makeTestWord('w-saya-alias', 'SAYA', ['私'])
+    const context = makeTypingContext([saya, aku, sayaAlias])
+
+    const question = buildQuestion('w-saya', 1, { ...context, rng: () => 0.5 })
+    assertQuestion(question, 'typing', 'w-saya')
+    equal(question.accepted, ['aku'], { itemId: 'w-saya', words: [saya, aku, sayaAlias] })
+  })
+
+  it('accepted の別解を正解として判定する', () => {
+    const saya = makeTestWord('w-saya', 'saya', ['私'])
+    const aku = makeTestWord('w-aku', 'aku', ['私'])
+    const context = makeTypingContext([saya, aku])
+
+    const question = buildQuestion('w-saya', 1, { ...context, rng: () => 0.5 })
+    assertQuestion(question, 'typing', 'w-saya')
+    judge(
+      question,
+      { kind: 'text', text: 'aku' },
+      { correct: true, close: false, correctText: 'saya' },
+    )
+    judge(
+      question,
+      { kind: 'text', text: 'AKU' },
+      { correct: true, close: false, correctText: 'saya' },
+    )
+    judge(
+      question,
+      { kind: 'text', text: 'nama' },
+      { correct: false, close: false, correctText: 'saya' },
+    )
   })
 })
 

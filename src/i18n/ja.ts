@@ -199,6 +199,7 @@ export const ja = {
   'lesson.notFound': 'レッスンが見つかりません。',
   'lesson.audio': '音声を聞く',
   'lesson.fill': '空欄に入る語を選ぶ',
+  'lesson.fill.typing': '空欄に入る語を入力する',
   'lesson.translate': '次の意味の外国語を答える',
 
   'review.none': '今日の復習はありません。',

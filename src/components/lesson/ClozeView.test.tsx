@@ -175,4 +175,80 @@ describe('ClozeView', () => {
       `入力: judgement.hint="cが抜けています" / 期待値: ヒントを表示 / 実際: ${screen.queryByText(/cが抜けています/)}`,
     ).toBeTruthy()
   })
+
+  it('uses lesson.fill.typing for typing mode', () => {
+    const question = makeTypingQuestion()
+    render(
+      <I18nProvider>
+        <ClozeView
+          question={question}
+          disabled={true}
+          judgement={null}
+          onSubmit={vi.fn()}
+          onSpeak={vi.fn()}
+        />
+      </I18nProvider>,
+    )
+
+    expect(
+      screen.getByText('空欄に入る語を入力する'),
+      `入力: typing mode / 期待値: 空欄に入る語を入力する / 実際: ${screen.queryByText('空欄に入る語を入力する')?.textContent}`,
+    ).toBeTruthy()
+  })
+
+  it('uses lesson.fill for choice mode', () => {
+    const question = makeChoiceQuestion()
+    render(
+      <I18nProvider>
+        <ClozeView
+          question={question}
+          disabled={true}
+          judgement={null}
+          onSubmit={vi.fn()}
+          onSpeak={vi.fn()}
+        />
+      </I18nProvider>,
+    )
+
+    expect(
+      screen.getByText('空欄に入る語を選ぶ'),
+      `入力: choice mode / 期待値: 空欄に入る語を選ぶ / 実際: ${screen.queryByText('空欄に入る語を選ぶ')?.textContent}`,
+    ).toBeTruthy()
+  })
+
+  it('does not have role="status" in feedback area', () => {
+    const question = makeTypingQuestion()
+    render(
+      <I18nProvider>
+        <ClozeView
+          question={question}
+          disabled={true}
+          judgement={{ correct: false, close: false, correctText: 'ねこ' }}
+          onSubmit={vi.fn()}
+          onSpeak={vi.fn()}
+        />
+      </I18nProvider>,
+    )
+
+    expect(
+      screen.getByText('不正解'),
+      `入力: judgementあり / 期待値: 文言「不正解」を表示 / 実際: ${screen.queryByText('不正解')?.textContent}`,
+    ).toBeTruthy()
+
+    const input = screen.getByPlaceholderText('答えを入力') as HTMLInputElement
+    expect(
+      input.className,
+      `入力: 不正解 judgement / 期待値: lq-input--danger と kp-anim-shake を含む / 実際: ${input.className}`,
+    ).toContain('lq-input--danger')
+    expect(
+      input.className,
+      `入力: 不正解 judgement / 期待値: kp-anim-shake を含む / 実際: ${input.className}`,
+    ).toContain('kp-anim-shake')
+
+    const statusRegions = screen.queryAllByRole('status')
+    expect(
+      statusRegions.length,
+      `入力: judgementあり / 期待値: role="status" の要素 0個 / 実際: ${statusRegions.length}個`,
+    ).toBe(0)
+  })
 })

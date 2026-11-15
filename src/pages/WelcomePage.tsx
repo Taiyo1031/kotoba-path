@@ -278,6 +278,11 @@ export function WelcomePage() {
     setStep((current) => (current === 2 ? 1 : 0))
   }
 
+  function handleAnswersChange(next: SurveyAnswers) {
+    setAnswers(next)
+    setErrors({})
+  }
+
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key !== 'Enter') {
       return
@@ -312,7 +317,7 @@ export function WelcomePage() {
       <p className="page-description">{t('welcome.intro')}</p>
       <p className="welcome-progress">{t('welcome.step.count', { current: step + 1, total: 3 })}</p>
 
-      <SurveyForm answers={answers} onChange={setAnswers} step={step} errors={errors} />
+      <SurveyForm answers={answers} onChange={handleAnswersChange} step={step} errors={errors} />
 
       {saveError && (
         <div className="welcome-save-error" role="alert">

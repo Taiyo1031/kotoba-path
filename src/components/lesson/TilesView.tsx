@@ -115,7 +115,7 @@ export function TilesView(props: QuestionViewProps<TilesQuestion>): JSX.Element 
         </button>
       </div>
       {judgement && (
-        <p className="li-judgement" aria-live="polite">
+        <p className="li-judgement">
           {judgement.correct ? t('lesson.correct') : t('lesson.incorrect')}
         </p>
       )}

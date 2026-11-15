@@ -128,7 +128,7 @@ export function McqView(props: QuestionViewProps<McqQuestion>): JSX.Element {
       </div>
 
       {judgement ? (
-        <p className="lq-feedback" role="status" aria-live="polite">
+        <p className="lq-feedback">
           {judgement.correct ? t('lesson.correct') : t('lesson.incorrect')}
         </p>
       ) : null}

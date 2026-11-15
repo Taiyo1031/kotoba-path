@@ -136,10 +136,7 @@ export function SettingsPage() {
     <div className="page settings-page">
       <h1 className="page-title">{t('page.settings')}</h1>
 
-      <section className="settings-section" aria-labelledby="settings-language-heading">
-        <h2 id="settings-language-heading" className="settings-heading">
-          {t('settings.uiLanguage')}
-        </h2>
+      <section className="settings-section">
         <div className="language-switcher settings-field">
           <label htmlFor="language-select">{t('settings.uiLanguage')}</label>
           <select id="language-select" value={language} onChange={handleLanguageChange}>
@@ -152,10 +149,7 @@ export function SettingsPage() {
         </div>
       </section>
 
-      <section className="settings-section" aria-labelledby="settings-daily-goal-heading">
-        <h2 id="settings-daily-goal-heading" className="settings-heading">
-          {t('settings.dailyGoal')}
-        </h2>
+      <section className="settings-section">
         <div className="settings-field">
           <label htmlFor="daily-goal">{t('settings.dailyGoal')}</label>
           <input
@@ -173,10 +167,7 @@ export function SettingsPage() {
         </div>
       </section>
 
-      <section className="settings-section" aria-labelledby="settings-study-days-heading">
-        <h2 id="settings-study-days-heading" className="settings-heading">
-          {t('settings.studyDays')}
-        </h2>
+      <section className="settings-section">
         {hasProfile ? (
           <div className="settings-field">
             <label htmlFor="study-days">{t('settings.studyDays')}</label>
@@ -199,10 +190,7 @@ export function SettingsPage() {
         )}
       </section>
 
-      <section className="settings-section" aria-labelledby="settings-tts-heading">
-        <h2 id="settings-tts-heading" className="settings-heading">
-          {t('settings.tts.enabled')}
-        </h2>
+      <section className="settings-section">
         <div className="settings-field settings-checkbox-field">
           <label htmlFor="tts-enabled">{t('settings.tts.enabled')}</label>
           <input

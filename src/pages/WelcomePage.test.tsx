@@ -103,6 +103,65 @@ describe('WelcomePage', () => {
     ).not.toBeNull()
   })
 
+  it('clears step 1 error when a purpose tag is selected', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<WelcomePage />)
+
+    await user.click(screen.getByRole('button', { name: '次へ' }))
+    await user.click(screen.getByRole('button', { name: '次へ' }))
+
+    const initialError = screen.queryByRole('alert')?.textContent ?? null
+    expect(
+      initialError,
+      `入力: 目的未回答で次へ / 期待値: 目的を教えてください / 実際: ${JSON.stringify(initialError)}`,
+    ).toBe('目的を教えてください')
+
+    await user.click(screen.getByRole('checkbox', { name: '旅行' }))
+
+    const errorAfterTag = screen.queryByRole('alert')?.textContent ?? null
+    expect(
+      errorAfterTag,
+      `入力: 旅行タグを選択 / 期待値: null（エラー消去） / 実際: ${JSON.stringify(errorAfterTag)}`,
+    ).toBeNull()
+
+    await user.click(screen.getByRole('button', { name: '次へ' }))
+
+    expect(
+      screen.queryByRole('heading', { name: '目標と期限を設定してください' }),
+      '入力: after tag selected and next / 期待値: step2 heading exists / 実際: null',
+    ).not.toBeNull()
+  })
+
+  it('clears step 1 error when free text is entered', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<WelcomePage />)
+
+    await user.click(screen.getByRole('button', { name: '次へ' }))
+    await user.click(screen.getByRole('button', { name: '次へ' }))
+
+    const initialError = screen.queryByRole('alert')?.textContent ?? null
+    expect(
+      initialError,
+      `入力: 目的未回答で次へ / 期待値: 目的を教えてください / 実際: ${JSON.stringify(initialError)}`,
+    ).toBe('目的を教えてください')
+
+    const freeText = screen.getByLabelText(/自由入力/)
+    await user.type(freeText, '旅行')
+
+    const errorAfterText = screen.queryByRole('alert')?.textContent ?? null
+    expect(
+      errorAfterText,
+      `入力: 自由入力に「旅行」 / 期待値: null（エラー消去） / 実際: ${JSON.stringify(errorAfterText)}`,
+    ).toBeNull()
+
+    await user.click(screen.getByRole('button', { name: '次へ' }))
+
+    expect(
+      screen.queryByRole('heading', { name: '目標と期限を設定してください' }),
+      '入力: after free text and next / 期待値: step2 heading exists / 実際: null',
+    ).not.toBeNull()
+  })
+
   it('blocks finish with past deadline and does not save', async () => {
     const user = userEvent.setup()
     renderWithProviders(<WelcomePage />)

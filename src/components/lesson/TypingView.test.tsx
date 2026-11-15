@@ -112,4 +112,62 @@ describe('TypingView', () => {
     expect(input.disabled, `期待: disabled`).toBe(true)
     expect(input.value, `期待: 空`).toBe('')
   })
+
+  it('li-hint-text has aria-live="polite"', async () => {
+    renderTypingView()
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole('button', { name: 'ヒント' }))
+
+    const hintElement = screen.getByText('m____').closest('.li-hint-text')
+    expect(
+      hintElement?.className,
+      `入力: ヒントボタンクリック後 / 期待値: li-hint-text クラスを持つ要素 / 実際: ${hintElement?.className}`,
+    ).toContain('li-hint-text')
+    expect(
+      hintElement?.getAttribute('aria-live'),
+      `入力: ヒントボタンクリック後 / 期待値: aria-live="polite" / 実際: ${hintElement?.getAttribute('aria-live')}`,
+    ).toBe('polite')
+  })
+
+  it('li-close-hint does not have aria-live', () => {
+    const judgement: Judgement = {
+      correct: false,
+      close: true,
+      hint: 'm____',
+      correctText: 'manga',
+    }
+    renderTypingView({ judgement })
+
+    const closeHintElement = screen.getByText('おしい!').closest('.li-close-hint')
+    expect(
+      closeHintElement?.className,
+      `入力: judgement.close=true / 期待値: li-close-hint クラスを持つ要素 / 実際: ${closeHintElement?.className}`,
+    ).toContain('li-close-hint')
+    expect(
+      closeHintElement?.getAttribute('aria-live'),
+      `入力: judgement.close=true / 期待値: aria-live 属性なし / 実際: ${closeHintElement?.getAttribute('aria-live')}`,
+    ).toBeNull()
+  })
+
+  it('does not have role="status" in feedback area', () => {
+    const judgement: Judgement = { correct: false, close: false, correctText: 'manga' }
+    renderTypingView({ judgement })
+
+    const input = screen.getByRole('textbox') as HTMLInputElement
+    expect(
+      input.className,
+      `入力: 不正解 judgement / 期待値: li-input-danger と kp-anim-shake を含む / 実際: ${input.className}`,
+    ).toContain('li-input-danger')
+    expect(
+      input.className,
+      `入力: 不正解 judgement / 期待値: kp-anim-shake を含む / 実際: ${input.className}`,
+    ).toContain('kp-anim-shake')
+
+    const statusRegions = screen.queryAllByRole('status')
+    expect(
+      statusRegions.length,
+      `入力: judgementあり / 期待値: role="status" の要素 0個 / 実際: ${statusRegions.length}個`,
+    ).toBe(0)
+  })
 })

@@ -180,4 +180,30 @@ describe('McqView', () => {
       `入力: onSpeakあり / 期待値: 音声ボタン存在 / 実際: ${audioButton.textContent}`,
     ).toBeTruthy()
   })
+
+  it('does not have role="status" in feedback area', () => {
+    const question = makeQuestion()
+    render(
+      <I18nProvider>
+        <McqView
+          question={question}
+          disabled={true}
+          judgement={{ correct: false, close: false, correctText: 'ねこ' }}
+          onSubmit={vi.fn()}
+          onSpeak={vi.fn()}
+        />
+      </I18nProvider>,
+    )
+
+    expect(
+      screen.getByText('不正解'),
+      `入力: judgementあり / 期待値: 文言「不正解」を表示 / 実際: ${screen.queryByText('不正解')?.textContent}`,
+    ).toBeTruthy()
+
+    const statusRegions = screen.queryAllByRole('status')
+    expect(
+      statusRegions.length,
+      `入力: judgementあり / 期待値: role="status" の要素 0個 / 実際: ${statusRegions.length}個`,
+    ).toBe(0)
+  })
 })

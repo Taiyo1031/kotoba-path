@@ -75,6 +75,27 @@ function getPageText(): string {
   return document.querySelector('.settings-page')?.textContent ?? ''
 }
 
+function expectSingleVisibleText(text: string) {
+  const matches = screen.queryAllByText(text)
+  expect(matches.length, `入力: ${text}、期待値: 1個だけ、実際: ${matches.length}個`).toBe(1)
+}
+
+function expectInputByLabelText(labelText: string, expectedTag?: string) {
+  const el = screen.queryByLabelText(labelText)
+  expect(el, `入力: ${labelText}、期待値: ラベルで到達できる入力、実際: 未検出`).not.toBeNull()
+
+  if (el === null) {
+    throw new Error(`入力: ${labelText}、期待値: ラベルで到達できる入力、実際: 未検出`)
+  }
+
+  if (expectedTag !== undefined) {
+    const actualTag = el.tagName.toLowerCase()
+    expect(actualTag, `入力: ${labelText}、期待値: <${expectedTag}>、実際: <${actualTag}>`).toBe(
+      expectedTag,
+    )
+  }
+}
+
 beforeEach(() => {
   localStorage.clear()
   mockSaveProfile.mockClear()
@@ -87,6 +108,28 @@ beforeEach(() => {
 })
 
 describe('SettingsPage', () => {
+  it('見出しとラベルの重複をなくし、各入力をラベルから到達できる', () => {
+    setTtsVoices([])
+    useAppState.setState({
+      status: 'ready',
+      data: makeData(),
+      lastBackupAt: null,
+      reload: async () => {},
+    })
+
+    renderPage()
+
+    expectSingleVisibleText('UI言語')
+    expectSingleVisibleText('1日の目標')
+    expectSingleVisibleText('学習日数/週')
+    expectSingleVisibleText('読み上げを使う')
+
+    expectInputByLabelText('UI言語', 'select')
+    expectInputByLabelText('1日の目標', 'input')
+    expectInputByLabelText('学習日数/週', 'select')
+    expectInputByLabelText('読み上げを使う', 'input')
+  })
+
   it('UI 言語を切り替えると画面の文言が変わる', async () => {
     const user = userEvent.setup()
     renderPage()
@@ -177,9 +220,10 @@ describe('SettingsPage', () => {
       targetLanguage: 'ms',
       goal: { studyDaysPerWeek: 5 },
     }
+    const actual = mockSaveProfile.mock.calls[0]?.[0]
     expect(
-      mockSaveProfile.mock.calls[0]?.[0],
-      `入力: 5、期待値: ${JSON.stringify(expected)}、実際: ${JSON.stringify(mockSaveProfile.mock.calls[0]?.[0])}`,
+      actual,
+      `入力: 5、期待値: ${JSON.stringify(expected)}、実際: ${JSON.stringify(actual)}`,
     ).toEqual(expected)
   })
 

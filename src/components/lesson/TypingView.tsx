@@ -97,7 +97,7 @@ export function TypingView(props: QuestionViewProps<TypingQuestion>): JSX.Elemen
         </p>
       )}
       {judgement?.close && (
-        <div className="li-close-hint" aria-live="polite">
+        <div className="li-close-hint">
           <span>{t('lesson.close.hint')}</span>
           {judgement.hint ? <span> {judgement.hint}</span> : null}
         </div>

@@ -1,12 +1,21 @@
+.welcome-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+}
+.welcome-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
 .welcome-page {
   display: grid;
   gap: var(--space-4);
 }
-
 .welcome-progress {
   font-size: var(--font-size-lg);
 }
-
 .welcome-step {
   display: grid;
   gap: var(--space-4);
@@ -14,37 +23,25 @@
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
-
 .welcome-step-title {
   font-size: var(--font-size-lg);
 }
-
 .welcome-fieldset,
-.welcome-options,
-.welcome-option,
 .welcome-field {
   display: grid;
   gap: var(--space-4);
 }
-
 .welcome-fieldset {
   border-radius: var(--radius-md);
 }
-
 .welcome-legend {
   font-size: var(--font-size-lg);
 }
-
-.welcome-option {
-  align-items: center;
-}
-
 .welcome-error,
 .welcome-save-error {
   padding-inline-start: var(--space-4);
   border-inline-start: 0.25rem solid var(--color-primary);
 }
-
 .welcome-actions {
   display: flex;
   gap: var(--space-4);

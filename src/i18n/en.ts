@@ -201,6 +201,7 @@ export const en: Record<keyof typeof ja, string> = {
   'lesson.notFound': 'Lesson not found.',
   'lesson.audio': 'Listen',
   'lesson.fill': 'Choose the word that fits the blank',
+  'lesson.fill.typing': 'Type the missing word',
   'lesson.translate': 'Answer in the target language',
 
   'review.none': 'No reviews due today.',
@@ -208,10 +209,12 @@ export const en: Record<keyof typeof ja, string> = {
   'review.due': 'Due items: {count}',
   'review.complete': "Today's review is done!",
 
-  'settings.studyDays.value': '{days} days/week',
+  'settings.studyDays.value': '{days} day(s)/week',
   'settings.saved': 'Saved.',
   'settings.noProfile': 'Complete the initial survey first.',
   'settings.tts.unavailable': 'Text-to-speech is unavailable for this language on this device.',
   'settings.tts.enabled': 'Use text-to-speech',
   'settings.language': 'Language',
 }
+
+// {days}-day streak
