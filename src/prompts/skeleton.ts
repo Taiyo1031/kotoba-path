@@ -1,6 +1,12 @@
 import { APP_CONFIG } from '../config/app'
 import { estimateUnitCount } from './estimate'
-import { commonInstructions, formatProfile, jsonExample, selfCheck } from './shared'
+import {
+  commonInstructions,
+  formatProfile,
+  jsonExample,
+  promptVersionLine,
+  selfCheck,
+} from './shared'
 import type { SkeletonPromptInput } from './types'
 
 export function buildSkeletonPrompt(input: SkeletonPromptInput): string {
@@ -40,5 +46,6 @@ keywords は3〜5個、itemEstimate は15〜25。
 optional: true は、省いても目標に届く単元だけ。`,
     jsonExample(example),
     selfCheck,
+    promptVersionLine(),
   ].join('\n\n')
 }

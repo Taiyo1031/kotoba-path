@@ -1,8 +1,9 @@
-﻿import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, Navigate } from 'react-router-dom'
 import { getNow, getToday } from '../app/clock'
 import { buildHomeView } from '../app/home'
 import type { HomeUnitRow } from '../app/home'
+import { isOnboarded } from '../app/onboarding'
 import { getSettings } from '../app/settings'
 import { useT } from '../i18n'
 import { ROUTES, unitPath } from '../routes'
@@ -89,7 +90,10 @@ export function HomePage() {
         {t('common.error')}
       </div>
     )
-  if (data === null)
+  if (data === null) {
+    if (!isOnboarded()) {
+      return <Navigate to={ROUTES.intro} replace />
+    }
     return (
       <div className="page">
         <p>{t('home.noProfile')}</p>
@@ -98,6 +102,7 @@ export function HomePage() {
         </Link>
       </div>
     )
+  }
   const view = buildHomeView(data, {
     today: getToday(),
     now: getNow(),

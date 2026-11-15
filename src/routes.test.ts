@@ -29,7 +29,7 @@ describe('routes', () => {
     ])
   })
 
-  it.each([ROUTES.welcome, ROUTES.unit, ROUTES.lesson, ROUTES.debug])(
+  it.each([ROUTES.welcome, ROUTES.intro, ROUTES.unit, ROUTES.lesson, ROUTES.debug])(
     'NAV_ITEMS excludes %j',
     (path) => {
       expect(
@@ -39,9 +39,10 @@ describe('routes', () => {
     },
   )
 
-  it('defines all eight route patterns', () => {
+  it('defines all nine route patterns', () => {
     expect(ROUTES, '入力: ROUTES').toEqual({
       welcome: '/welcome',
+      intro: '/intro',
       home: '/',
       unit: '/unit/:id',
       lesson: '/lesson/:unitId/:stepId',

@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { getAppStore } from '../../db'
 import { useT } from '../../i18n'
 import { commitImport, parseImportText } from '../../io/importer'
 import type { ImportPreview } from '../../io/importer'
 import type { StudyData } from '../../schema'
 import { useAppState } from '../../state/appState'
+import { buildFixPrompt } from '../../prompts'
+import { copyText } from '../../utils/clipboard'
 
 export function ImportPanel() {
   const t = useT()
@@ -15,10 +17,13 @@ export function ImportPanel() {
   const preview = validatedData === data ? savedPreview : null
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
+  const [fixPrompt, setFixPrompt] = useState<string | null>(null)
+  const fixRef = useRef<HTMLTextAreaElement>(null)
   const update = (value: string) => {
     setText(value)
     setPreview(null)
     setMessage('')
+    setFixPrompt(null)
   }
   const run = async (action: () => Promise<void>) => {
     setBusy(true)
@@ -32,6 +37,7 @@ export function ImportPanel() {
     }
   }
   const validate = () => {
+    setFixPrompt(null)
     setValidatedData(data)
     const context = {
       targetLanguage: data?.profile.targetLanguage ?? '',
@@ -125,6 +131,36 @@ export function ImportPanel() {
                   </li>
                 ))}
               </ul>
+              {preview.issues.some((issue) => issue.severity === 'error') && (
+                <button
+                  onClick={() => {
+                    const prompt = buildFixPrompt({
+                      issues: preview.issues
+                        .filter((issue) => issue.severity === 'error')
+                        .map(({ path, message }) => ({ path, message })),
+                      originalText: text,
+                    })
+                    setFixPrompt(prompt)
+                    void copyText(prompt, fixRef.current)
+                  }}
+                >
+                  {t('data.fix.button')}
+                </button>
+              )}
+              {fixPrompt && (
+                <>
+                  <h4 id="fix-prompt-title">{t('data.fix.title')}</h4>
+                  <p>{t('data.fix.hint')}</p>
+                  <textarea
+                    id="fix-prompt"
+                    aria-labelledby="fix-prompt-title"
+                    ref={fixRef}
+                    readOnly
+                    rows={8}
+                    value={fixPrompt}
+                  />
+                </>
+              )}
               {preview.ok && <p>{t('data.valid')}</p>}
               {diffs &&
                 Object.entries(diffs).map(([key, diff]) => (
@@ -151,6 +187,23 @@ export function ImportPanel() {
                     {preview.rewrites.map((r, i) => (
                       <li key={i}>
                         <code>{r.path}</code>: {r.from} → {r.to}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+              {preview.kind === 'unit' && preview.ok && preview.content && (
+                <details open>
+                  <summary>{t('data.sample.title')}</summary>
+                  <ul>
+                    {preview.content.words.slice(0, 5).map((word) => (
+                      <li key={word.id}>
+                        {word.lemma}
+                        {word.reading && ` (${word.reading})`}
+                        {word.meaning[0] && `: ${word.meaning[0]}`}
+                        {word.uncertain && (
+                          <span className="data-warning">{t('data.sample.uncertain')}</span>
+                        )}
                       </li>
                     ))}
                   </ul>

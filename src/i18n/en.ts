@@ -215,6 +215,34 @@ export const en: Record<keyof typeof ja, string> = {
   'settings.tts.unavailable': 'Text-to-speech is unavailable for this language on this device.',
   'settings.tts.enabled': 'Use text-to-speech',
   'settings.language': 'Language',
-}
 
-// {days}-day streak
+  // 説明画面・流れ・取り込み確認用の文言
+  'flow.title': 'Next step',
+  'flow.skeleton': 'Copy the course outline prompt and paste it into your AI.',
+  'flow.unit': 'Copy the prompt for "{title}" and paste it into your AI.',
+  'flow.import': 'Paste the JSON your AI returned into Import below.',
+  'flow.done': 'All units are ready. Start learning from Home.',
+  'flow.progress': '{done}/{total} units ready',
+  'data.fix.button': 'Copy fix-request prompt',
+  'data.fix.title': 'Fix-request prompt',
+  'data.fix.hint': 'Paste this into your AI to get a corrected JSON.',
+  'data.sample.title': 'Preview of the content (sample)',
+  'data.sample.uncertain': 'Check',
+  'intro.title': 'Getting started',
+  'intro.card1.title': 'About this app',
+  'intro.card1.body':
+    'This app helps you learn with material made by an AI, fitted to your goal and deadline. You ask an AI to create the material outside the app, then import it as JSON.',
+  'intro.card2.title': 'Two kinds of prompts',
+  'intro.card2.body':
+    '1) Outline: creates the map of the whole course (the list of units). 2) Unit: creates the content of one unit (words, phrases, sentences). Do 1 first, then 2 for each unit.',
+  'intro.card3.title': 'First steps',
+  'intro.card3.body':
+    '1) Answer the survey. 2) Copy the outline prompt and paste it into your AI. 3) Import the JSON it returns. 4) Do the same for each unit prompt. 5) Start learning from Home. All you do is copy, paste, and import.',
+  'intro.next': 'Next',
+  'intro.back': 'Back',
+  'intro.skip': 'Skip',
+  'intro.start': 'Get started',
+  'intro.progress': '{current} / {total}',
+  'settings.intro.link': 'View the intro again',
+  'settings.showReading': 'Show readings',
+}

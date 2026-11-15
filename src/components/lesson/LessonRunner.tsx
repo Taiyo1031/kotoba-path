@@ -178,7 +178,8 @@ export function LessonRunner(props: LessonRunnerProps): JSX.Element {
           {...voice}
         />
       )
-  } else if (question?.format === 'mcq') view = <McqView question={question} {...common} />
+  } else if (question?.format === 'mcq')
+    view = <McqView question={question} showReading={getSettings().showReading} {...common} />
   else if (question?.format === 'cloze') view = <ClozeView question={question} {...common} />
   else if (question?.format === 'typing') view = <TypingView question={question} {...common} />
   else if (question?.format === 'tiles') view = <TilesView question={question} {...common} />

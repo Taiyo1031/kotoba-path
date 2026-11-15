@@ -9,6 +9,7 @@ import { ReviewPage } from './pages/ReviewPage'
 import { DataPage } from './pages/DataPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { DebugPage } from './pages/DebugPage'
+import { IntroPage } from './pages/IntroPage'
 import { ROUTES } from './routes'
 
 export default function App() {
@@ -41,6 +42,7 @@ export default function App() {
           }
         >
           <Route path={ROUTES.welcome} element={<WelcomePage />} />
+          <Route path={ROUTES.intro} element={<IntroPage />} />
           <Route path={ROUTES.lesson} element={<LessonPage />} />
         </Route>
         <Route path="*" element={<Navigate to={ROUTES.home} replace />} />

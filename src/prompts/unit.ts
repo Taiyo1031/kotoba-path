@@ -1,5 +1,11 @@
 import { APP_CONFIG } from '../config/app'
-import { commonInstructions, formatProfile, jsonExample, selfCheck } from './shared'
+import {
+  commonInstructions,
+  formatProfile,
+  jsonExample,
+  promptVersionLine,
+  selfCheck,
+} from './shared'
 import type { UnitPromptInput } from './types'
 
 export function buildUnitPrompt(input: UnitPromptInput): string {
@@ -13,7 +19,7 @@ export function buildUnitPrompt(input: UnitPromptInput): string {
         id: `${profile.targetLanguage}:lemma`,
         lemma: 'lemma',
         pos: 'noun',
-        reading: '',
+        reading: '読みの例',
         meaning: [`${profile.nativeLanguageName}での意味`],
         tags: [],
         rel: [],
@@ -47,6 +53,16 @@ export function buildUnitPrompt(input: UnitPromptInput): string {
       },
     ],
   }
+  const readingSection =
+    profile.nativeLanguage === 'ja'
+      ? `【読み(reading)】
+- reading は、すべての words に必ず入れる。空にしない。
+- 母語が日本語(profile.nativeLanguage === 'ja')のときは、カナで近似する(例: selamat → スラマッ)。
+- 対象言語がラテン文字以外の文字体系のときは、カナの近似に加えて、ローマ字を / でつなぐ(例: カナ/romaji)。`
+      : `【読み(reading)】
+- reading は、すべての words に必ず入れる。空にしない。
+- 母語の読者が読める近似表記で書く。`
+
   return [
     '# 単元の教材を作成',
     commonInstructions(
@@ -55,6 +71,7 @@ export function buildUnitPrompt(input: UnitPromptInput): string {
 words, phrases, sentences, grammarNotes は、それぞれ以下のオブジェクトの配列。
 words: id, lemma, pos, reading, note は string、meaning, tags は string[]、
 rel は { type: "synonym" | "antonym" | "confusable" | "related", id: string }[]、uncertain は boolean。
+reading は必須。空にしない。
 phrases: id, target, meaning は string、slots は { [スロット名: string]: { tag: string } }、fixed は boolean。
 target は "Saya suka {fruit}."、meaning は "私は{fruit}が好きです。" のように対応するスロットを含む。
 slots は { "fruit": { "tag": "fruit" } } の形式。fixed: true は固定フレーズ(スロットなし、slots は {})。
@@ -74,6 +91,7 @@ wordIds と appliesTo の参照先も同じ単元内に存在するIDのみ。`,
 words は1回15〜25項目。多い単元は A と B の2回に分けて出す。
 ${part === 'A' ? '今回はパートAです。残りはパートBで出します。' : part === 'B' ? '今回はパートBです。パートAの続きとして出します。' : ''}
 ${existingWordIds ? `既存の単語ID: ${JSON.stringify(existingWordIds)}。これらと重複しない語を選ぶ。` : ''}`,
+    readingSection,
     `【スロット付きフレーズ】
 同じ tag を付けた単語が同じ単元内に3つ以上あるときだけ作る。
 日本語の助詞や語順がテンプレートと合う語だけをタグにする。合わない語には別のタグを付ける。
@@ -84,5 +102,6 @@ ${allowedTags ? `スロット用タグは次の候補から選ぶ: ${JSON.string
 文法メモの hint は「なぜそうなるか」を1〜2文で説明する。`,
     jsonExample(example),
     selfCheck,
+    promptVersionLine(),
   ].join('\n\n')
 }

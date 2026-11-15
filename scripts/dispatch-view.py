@@ -112,6 +112,22 @@ def snapshot() -> dict:
 
     passed = {i for i, r in results.items() if r["status"] in ("PASS", "CLAUDE")}
 
+    # 結果表は最後にまとめて出るが、波ごとの STATS 行(成功 n/n)は波の終わりに出る。
+    # 全員成功した波の仕事は、「完了」とみなす(計画の依存の深さ = 波の番号)。
+    by_id = {t["id"]: t for t in plan}
+
+    def depth(tid: str, seen: tuple = ()) -> int:
+        deps = [d for d in by_id.get(tid, {}).get("depends_on", []) if d in by_id and d not in seen]
+        return 1 + max((depth(d, seen + (tid,)) for d in deps), default=0)
+
+    done_waves = set()
+    for block in re.split(r"(?m)^=== 波 ", cur)[1:]:
+        stats = re.search(r"STATS: 成功 (\d+)/(\d+)", block)
+        if stats and stats.group(1) == stats.group(2):
+            done_waves.add(int(block.split("/", 1)[0]))
+    wave_done = {t["id"]: depth(t["id"]) for t in plan if depth(t["id"]) in done_waves}
+    passed |= set(wave_done)
+
     # 結果表は dispatch の最後にまとめて出る。それまでは、Codex の要約ファイルが中身つきで
     # 出ていれば「実装済み(結果確認待ち)」とみなす(Codex は終わったときに要約を書くため)。
     def codex_summary(tid: str):
@@ -149,6 +165,8 @@ def snapshot() -> dict:
             row["state"] = ("done" if res["status"] in ("PASS", "CLAUDE")
                             else "limit" if res["status"] == "CODEX_LIMIT"
                             else "blocked" if res["status"] == "BLOCKED" else "failed")
+        elif tid in wave_done:
+            row.update(state="done", note=f"第{wave_done[tid]}波で完了(PCや試行回数は、全体の終了後に出ます)")
         else:
             waiting = [d for d in t.get("depends_on", []) if d not in passed]
             if waiting:
@@ -168,12 +186,22 @@ def snapshot() -> dict:
         rows.append(row)
 
     devices = {}
+    run_devices = {}
+    run_start = None
+    start = re.search(r"=== dispatch start: \S+ (\d+)/(\d+)/(\d+)\s+(\d+):(\d+):(\d+)", cur)
+    if start:
+        mo, dd, yy, hh, mi, ss = (int(x) for x in start.groups())
+        run_start = f"{yy:04d}-{mo:02d}-{dd:02d} {hh:02d}:{mi:02d}:{ss:02d}"
     try:
         for entry in json.loads(read_text(ROOT / ".lmstudio" / "stats.json") or "[]"):
+            in_run = run_start is not None and str(entry.get("at", "")) >= run_start
             for name, d in entry.get("by_device", {}).items():
-                cur_d = devices.setdefault(name.replace("T2250-", ""), {"calls": 0, "secs": 0.0})
-                cur_d["calls"] += d.get("calls", 0)
-                cur_d["secs"] += d.get("secs", 0.0)
+                key = name.replace("T2250-", "")
+                targets = [devices] + ([run_devices] if in_run else [])
+                for target in targets:
+                    cur_d = target.setdefault(key, {"calls": 0, "secs": 0.0})
+                    cur_d["calls"] += d.get("calls", 0)
+                    cur_d["secs"] += d.get("secs", 0.0)
     except json.JSONDecodeError:
         pass
 
@@ -181,6 +209,7 @@ def snapshot() -> dict:
         "serverTime": time.time(), "lastActivityAt": latest_activity(), "wave": wave, "source": source,
         "finished": "=== dispatch end" in cur, "rows": rows,
         "devices": [{"name": n, **v} for n, v in devices.items()],
+        "devicesRun": [{"name": n, **v} for n, v in run_devices.items()],
     }
 
 
@@ -287,7 +316,7 @@ main{max-width:56rem;margin:0 auto}h1{font-size:1.2rem;margin:.2rem 0}h2{font-si
 .detail summary{cursor:pointer;margin:.3rem 0}.detail code{font-size:.82rem}
 .detail pre{max-height:18rem;overflow:auto;white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px solid var(--line);border-radius:.4rem;padding:.5rem;font-size:.78rem;margin:.3rem 0}
 </style></head><body><main>
-<div class="top"><h1>ディスパッチ状況</h1><span class="pill" id="age">読み込み中…</span></div>
+<div class="top"><h1>ディスパッチ状況</h1><span class="pill" id="out"></span><span class="pill" id="age">読み込み中…</span></div>
 <div id="summary" class="muted"></div><div class="muted">タスクをクリックすると、送る中身と保存済みの出力が見られます</div><div class="bar"><i id="bar" style="width:0"></i></div>
 <div id="body"></div>
 </main>
@@ -342,12 +371,14 @@ function render() {
     (data.lastActivityAt ? `・ファイル最終変更 ${hhmmss(data.lastActivityAt)}` : "") + (data.source ? `・ログ: ${data.source}` : "");
   document.getElementById("bar").style.width = (n ? (done.length + fin.length) / n * 100 : 0) + "%";
   let h = `<h2>いま動いているもの(${run.length})</h2>`;
-  h += run.length ? run.map(r => card(r, "run", r.startedAt ? `・開始 ${hhmmss(r.startedAt)}` : (r.lastOutputAt ? `・最後の出力 ${hhmmss(r.lastOutputAt)}` : ""))).join("") : '<div class="muted">いま動いているタスクはありません</div>';
+  h += run.length ? run.map(r => card(r, "run", (r.startedAt ? `・開始 ${hhmmss(r.startedAt)}` : "") + (r.lastOutputAt ? `・最後の出力 ${hhmmss(r.lastOutputAt)}(${ago(Math.max(0, Math.floor(data.serverTime - r.lastOutputAt)))})` : ""))).join("") : '<div class="muted">いま動いているタスクはありません</div>';
   if (failed_.length) h += `<h2 class="err">失敗・停止(${failed_.length})</h2>` + failed_.map(r => card(r, "fail", `・${r.state}`)).join("");
   h += `<h2>残り(${rest.length})</h2>` + (rest.length ? rest.map(r => card(r, "", "")).join("") : '<div class="muted">残りはありません</div>');
   if (fin.length) h += `<h2>実装済み・結果確認待ち(${fin.length})</h2><div class="muted">Codex の要約が出ています。テスト結果の確定は、dispatch の最後の結果表で分かります。</div>` + fin.map(r => card(r, "done", "")).join("");
   h += `<h2>確定(${done.length})</h2>` + done.map(r => card(r, "done", "")).join("");
-  if (data.devices.length) h += "<h2>LM Studio の使用量(累計)</h2>" + data.devices.map(d => `<div class="card"><span class="who">${esc(d.name)}</span> <span class="muted">${d.calls}回・${Math.round(d.secs)}秒</span></div>`).join("");
+  const devCard = d => `<div class="card"><span class="who">${esc(d.name)}</span> <span class="muted">${d.calls}回・${Math.round(d.secs)}秒</span></div>`;
+  if (data.devicesRun && data.devicesRun.length) h += "<h2>今回の実行で使った PC(完了した波の分)</h2>" + data.devicesRun.map(devCard).join("");
+  if (data.devices.length) h += "<h2>LM Studio の使用量(累計。過去の実行を含む)</h2>" + data.devices.map(devCard).join("");
   if (h !== lastHtml) { document.getElementById("body").innerHTML = h; lastHtml = h; }
 }
 async function load() {
@@ -370,6 +401,12 @@ document.addEventListener("toggle", e => {
 }, true);
 function tick() {
   const s = last ? Math.floor((Date.now() - last) / 1000) : 0;
+  const out = document.getElementById("out");
+  if (data && data.lastActivityAt && !failed) {
+    const age = Math.max(0, Math.floor(data.serverTime - data.lastActivityAt + (Date.now() - last) / 1000));
+    out.textContent = "最後の出力 " + ago(age);
+    out.style.color = age > 1800 ? "var(--red)" : age > 600 ? "var(--amber)" : "";
+  } else out.textContent = "";
   document.getElementById("age").innerHTML = failed ? '<span class="err">サーバーに接続できません</span>' : last ? `最終更新 ${s}秒前(${EVERY}秒ごとに更新)` : "読み込み中…";
 }
 load(); setInterval(load, EVERY * 1000); setInterval(tick, 1000);

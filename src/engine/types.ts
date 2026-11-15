@@ -44,6 +44,8 @@ export interface McqQuestion {
   direction: McqDirection
   /** 問題文(外国語→母語なら見出し語、母語→外国語なら意味。音声→意味なら見出し語(読み上げ用)) */
   prompt: string
+  /** 外国語→母語のときだけ、問題文の語の読み(空なら付けない) */
+  promptReading?: string
   /** シャッフル済みの選択肢(正解を含む) */
   options: Option[]
   correctId: string

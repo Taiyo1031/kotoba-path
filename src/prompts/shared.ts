@@ -1,3 +1,4 @@
+import { APP_CONFIG } from '../config/app'
 import type { PromptProfile } from './types'
 
 export function formatProfile(profile: PromptProfile): string {
@@ -50,9 +51,14 @@ export function jsonExample(value: unknown): string {
   ].join('\n')
 }
 
+export function promptVersionLine(): string {
+  return `プロンプトの版: ${APP_CONFIG.promptVersion}`
+}
+
 export const selfCheck = `【自己チェック】
 出力前に以下を確認する(チェック結果は出力しない)。
 - IDの規則を守り、重複していないこと。
 - 参照先の存在を確認し、同じ単元内のIDを参照していること。
 - 指定の件数を満たしていること。
-- JSONとして正しいこと。`
+- JSONとして正しいこと。
+- 単語の reading がすべて入っていること(単元プロンプトの場合)。`

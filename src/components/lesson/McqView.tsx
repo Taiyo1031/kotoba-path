@@ -12,8 +12,10 @@ interface SelectionState {
   submitted: boolean
 }
 
-export function McqView(props: QuestionViewProps<McqQuestion>): JSX.Element {
-  const { question, disabled, judgement, onSubmit, onSpeak } = props
+export function McqView(
+  props: QuestionViewProps<McqQuestion> & { showReading?: boolean },
+): JSX.Element {
+  const { question, disabled, judgement, onSubmit, onSpeak, showReading = true } = props
   const t = useT()
 
   const options = question.options
@@ -75,7 +77,12 @@ export function McqView(props: QuestionViewProps<McqQuestion>): JSX.Element {
     <div className="lq-mcq">
       {showPrompt ? (
         <div className="lq-prompt-row">
-          <p className="lq-prompt">{question.prompt}</p>
+          <div>
+            <p className="lq-prompt">{question.prompt}</p>
+            {showReading && question.promptReading ? (
+              <p className="lq-reading">{question.promptReading}</p>
+            ) : null}
+          </div>
           {onSpeak && question.direction === 'foreignToNative' ? (
             <button
               type="button"

@@ -2,7 +2,8 @@
 import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { setOnboarded } from '../app/onboarding'
 import { createTranslator, I18nProvider } from '../i18n'
 import { StudyDataSchema } from '../schema'
 import { ROUTES, unitPath } from '../routes'
@@ -56,9 +57,13 @@ function check(input: unknown, expected: unknown, actual: unknown) {
 }
 function show() {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={['/']}>
       <I18nProvider initialLanguage="ja">
-        <HomePage />
+        <Routes>
+          <Route path={ROUTES.home} element={<HomePage />} />
+          <Route path={ROUTES.intro} element={<p>Intro page</p>} />
+          <Route path={ROUTES.welcome} element={<p>{t('page.welcome')}</p>} />
+        </Routes>
       </I18nProvider>
     </MemoryRouter>,
   )
@@ -96,6 +101,7 @@ describe('HomePage', () => {
   })
   it('shows the questionnaire link without a profile', async () => {
     useAppState.setState({ data: null })
+    setOnboarded(true)
     show()
     check('null data', true, screen.getByText(t('home.noProfile')) !== null)
     const link = screen.getByRole('link', { name: t('home.noProfile.action') })
@@ -208,5 +214,30 @@ describe('HomePage', () => {
       ROUTES.data,
       screen.getByRole('link', { name: t('home.empty.action') }).getAttribute('href'),
     )
+  })
+
+  describe('onboarding behavior', () => {
+    it('navigates to intro when data is null and not onboarded', () => {
+      useAppState.setState({ data: null })
+
+      show()
+      check(
+        { data: null, onboarded: false, route: ROUTES.intro },
+        'Intro page',
+        screen.queryByText('Intro page')?.textContent,
+      )
+    })
+
+    it.each([false, true])('shows home with data when onboarded=%s', (onboarded) => {
+      setOnboarded(onboarded)
+
+      show()
+      check(
+        { data: 'present', onboarded },
+        t('page.home'),
+        screen.queryByRole('heading', { name: t('page.home'), level: 1 })?.textContent,
+      )
+      check({ data: 'present', onboarded }, null, screen.queryByText('Intro page'))
+    })
   })
 })

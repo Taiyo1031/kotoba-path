@@ -7,6 +7,7 @@ export const ROUTES = {
   data: '/data',
   settings: '/settings',
   debug: '/debug',
+  intro: '/intro',
 } as const
 
 export function unitPath(id: string): string {

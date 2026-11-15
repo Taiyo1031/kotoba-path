@@ -34,6 +34,7 @@ export function SettingsPage() {
   const [dailyGoalDraft, setDailyGoalDraft] = useState(() => String(getSettings().dailyGoal))
   const [dailyGoalBaseline, setDailyGoalBaseline] = useState(() => getSettings().dailyGoal)
   const [ttsEnabled, setTtsEnabled] = useState(() => getSettings().ttsEnabled)
+  const [showReading, setShowReading] = useState(() => getSettings().showReading)
   const [savedVisible, setSavedVisible] = useState(false)
 
   const profile = data?.profile ?? null
@@ -129,6 +130,13 @@ export function SettingsPage() {
     markSaved()
   }
 
+  function handleShowReadingChange(event: ChangeEvent<HTMLInputElement>) {
+    const showReading = event.currentTarget.checked
+    setShowReading(showReading)
+    saveSettings({ showReading })
+    markSaved()
+  }
+
   const ttsAvailable =
     hasProfile && typeof targetLanguage === 'string' && hasVoiceFor(targetLanguage)
 
@@ -201,11 +209,26 @@ export function SettingsPage() {
             onChange={handleTtsChange}
           />
         </div>
+        <div className="settings-field settings-checkbox-field">
+          <label htmlFor="show-reading">{t('settings.showReading')}</label>
+          <input
+            id="show-reading"
+            type="checkbox"
+            checked={showReading}
+            onChange={handleShowReadingChange}
+          />
+        </div>
         {!ttsAvailable && (
           <p className="settings-note" data-testid="settings-tts-unavailable">
             {t('settings.tts.unavailable')}
           </p>
         )}
+      </section>
+
+      <section className="settings-section">
+        <Link className="intro-link" to={ROUTES.intro}>
+          {t('settings.intro.link')}
+        </Link>
       </section>
 
       <section className="settings-section settings-llm" aria-labelledby="settings-llm-heading">

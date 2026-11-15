@@ -60,6 +60,9 @@ export function buildMcq(
     itemId: word.id,
     direction,
     prompt: promptText(word, direction),
+    ...(direction === 'foreignToNative' && word.reading !== ''
+      ? { promptReading: word.reading }
+      : {}),
     options: shuffle(options, context.rng),
     correctId: word.id,
   }

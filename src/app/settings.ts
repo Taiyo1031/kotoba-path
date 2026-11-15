@@ -5,11 +5,13 @@ export const SETTINGS_KEY = 'kp.settings'
 export interface AppSettings {
   dailyGoal: number
   ttsEnabled: boolean
+  showReading: boolean
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
   dailyGoal: GAME_CONFIG.dailyGoalDefault,
   ttsEnabled: true,
+  showReading: true,
 }
 
 // dailyGoal は 1 以上 200 以下の整数のみ採用
@@ -51,6 +53,9 @@ export function getSettings(): AppSettings {
   if (isBoolean(record.ttsEnabled)) {
     settings.ttsEnabled = record.ttsEnabled
   }
+  if (isBoolean(record.showReading)) {
+    settings.showReading = record.showReading
+  }
   return settings
 }
 
@@ -61,6 +66,9 @@ export function saveSettings(partial: Partial<AppSettings>): AppSettings {
   }
   if (isBoolean(partial.ttsEnabled)) {
     next.ttsEnabled = partial.ttsEnabled
+  }
+  if (isBoolean(partial.showReading)) {
+    next.showReading = partial.showReading
   }
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(next))

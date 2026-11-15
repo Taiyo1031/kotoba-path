@@ -220,4 +220,22 @@ describe('buildMcq', () => {
     expect(JSON.stringify(word), `入力: ${beforeWord} 期待値: ${beforeWord}`).toBe(beforeWord)
     expect(JSON.stringify(pool), `入力: ${beforePool} 期待値: ${beforePool}`).toBe(beforePool)
   })
+  it.each(['foreignToNative', 'nativeToForeign', 'audioToMeaning'] as const)(
+    'reading for %s',
+    (direction) => {
+      for (const reading of ['スラマッ', '']) {
+        const word = { ...makeWord('w1', 'selamat', 'greeting'), reading }
+        const question = build(word, direction, [word])
+        const expected = direction === 'foreignToNative' && reading !== ''
+        expect(
+          Object.hasOwn(question, 'promptReading'),
+          'Input: ' + JSON.stringify({ direction, reading }),
+        ).toBe(expected)
+        if (expected)
+          expect(question.promptReading, 'Input: ' + JSON.stringify({ direction, reading })).toBe(
+            reading,
+          )
+      }
+    },
+  )
 })

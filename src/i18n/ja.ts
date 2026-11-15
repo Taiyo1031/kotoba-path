@@ -213,4 +213,34 @@ export const ja = {
   'settings.tts.unavailable': 'この端末では、この言語の読み上げが使えません。',
   'settings.tts.enabled': '読み上げを使う',
   'settings.language': '言語',
+
+  // 説明画面・流れ・取り込み確認用の文言
+  'flow.title': '次にやること',
+  'flow.skeleton': '「コースの骨組み」のプロンプトをコピーして、AI に貼り付けてください。',
+  'flow.unit': '「{title}」の中身のプロンプトをコピーして、AI に貼り付けてください。',
+  'flow.import': 'AI が返した JSON を、下の「取り込み」に貼り付けてください。',
+  'flow.done': 'すべての単元の準備ができました。ホームから学習を始めましょう。',
+  'flow.progress': '単元 {done}/{total} 準備済み',
+  'data.fix.button': '修正依頼プロンプトをコピー',
+  'data.fix.title': '修正依頼プロンプト',
+  'data.fix.hint': 'これを AI に貼り付けると、エラー箇所を直した JSON が返ります。',
+  'data.sample.title': '取り込む内容の確認(一部)',
+  'data.sample.uncertain': '要確認',
+  'intro.title': 'はじめに',
+  'intro.card1.title': 'このアプリについて',
+  'intro.card1.body':
+    'あなたの目的と期限に合わせて、AI が作った教材で学ぶ道具です。教材はアプリの外で AI に作ってもらい、JSON として取り込みます。',
+  'intro.card2.title': '2種類のプロンプト',
+  'intro.card2.body':
+    '①骨組み: コース全体の地図(単元の一覧)を作ります。②単元: 1つの単元の中身(単語・フレーズ・例文)を作ります。①を先に、②は単元ごとに行います。',
+  'intro.card3.title': '最初の手順',
+  'intro.card3.body':
+    '①アンケートに答える ②骨組みのプロンプトをコピーして AI に貼る ③返ってきた JSON を取り込む ④単元のプロンプトも同じように行う ⑤ホームから学習を始める。あなたがやるのは、コピー・貼り付け・取り込みです。',
+  'intro.next': '次へ',
+  'intro.back': '戻る',
+  'intro.skip': 'スキップ',
+  'intro.start': '始める',
+  'intro.progress': '{current} / {total}',
+  'settings.intro.link': '使い方をもう一度見る',
+  'settings.showReading': '読み(カナ・ローマ字)を表示',
 } as const

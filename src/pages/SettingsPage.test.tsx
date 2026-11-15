@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { getSettings } from '../app/settings'
-import { I18nProvider } from '../i18n'
+import { createTranslator, I18nProvider } from '../i18n'
+import { ROUTES } from '../routes'
 import type { StudyData } from '../schema'
 import { useAppState } from '../state/appState'
 import { SettingsPage } from './SettingsPage'
@@ -45,7 +46,7 @@ function setTtsVoices(voices: Array<{ lang: string }>) {
 
 function renderPage() {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={['/settings']}>
       <I18nProvider>
         <SettingsPage />
       </I18nProvider>
@@ -295,5 +296,40 @@ describe('SettingsPage', () => {
       note.textContent ?? '',
       `入力: voices=[]、期待値: settings.tts.unavailable が表示される、実際: ${note.textContent}`,
     ).not.toBe('')
+  })
+
+  describe('intro link', () => {
+    it('shows the intro link before the LLM connection section', () => {
+      renderPage()
+
+      const text = createTranslator('ja')('settings.intro.link')
+      const link = screen.queryByRole('link', { name: text })
+      const href = link?.getAttribute('href')
+      expect(href, `入力: ${text}、期待値: ${ROUTES.intro}、実際: ${href}`).toBe(ROUTES.intro)
+      const hasClass = link?.classList.contains('intro-link')
+      expect(hasClass, `入力: ${text}、期待値: intro-link クラスあり、実際: ${hasClass}`).toBe(true)
+
+      const heading = document.getElementById('settings-llm-heading')
+      const beforeHeading =
+        link !== null &&
+        heading !== null &&
+        Boolean(link.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING)
+      expect(
+        beforeHeading,
+        `入力: ${text}、期待値: LLM 接続の見出しより前、実際: ${beforeHeading}`,
+      ).toBe(true)
+    })
+  })
+  it('toggles reading through its accessible label and persists it', async () => {
+    const user = userEvent.setup()
+    setTtsVoices([])
+    renderPage()
+    const checkbox = screen.getByLabelText('読み(カナ・ローマ字)を表示') as HTMLInputElement
+    expect(checkbox.checked, 'Input: unset').toBe(true)
+    await user.click(checkbox)
+    expect(getSettings().showReading, 'Input: uncheck reading').toBe(false)
+    expect(checkbox.checked, 'Input: uncheck reading').toBe(false)
+    await user.click(checkbox)
+    expect(getSettings().showReading, 'Input: recheck reading').toBe(true)
   })
 })

@@ -24,7 +24,7 @@ describe('settings', () => {
 
   it('保存した値を読み出す', () => {
     const input = { dailyGoal: 30, ttsEnabled: false }
-    const expected = { dailyGoal: 30, ttsEnabled: false }
+    const expected = { showReading: true, dailyGoal: 30, ttsEnabled: false }
     const saved = saveSettings(input)
     expect(saved, `入力: ${JSON.stringify(input)}, 期待: ${JSON.stringify(expected)}`).toEqual(
       expected,
@@ -38,7 +38,7 @@ describe('settings', () => {
   it('部分更新で片方だけ変更する', () => {
     saveSettings({ dailyGoal: 40, ttsEnabled: true })
     const input = { ttsEnabled: false }
-    const expected = { dailyGoal: 40, ttsEnabled: false }
+    const expected = { showReading: true, dailyGoal: 40, ttsEnabled: false }
     const actual = saveSettings(input)
     expect(actual, `入力: ${JSON.stringify(input)}, 期待: ${JSON.stringify(expected)}`).toEqual(
       expected,
@@ -53,7 +53,11 @@ describe('settings', () => {
     const bads: unknown[] = [0, 201, 1.5, '30']
     for (const bad of bads) {
       const input = { dailyGoal: bad } as unknown as Partial<AppSettings>
-      const expected = { dailyGoal: DEFAULT_SETTINGS.dailyGoal, ttsEnabled: true }
+      const expected = {
+        showReading: true,
+        dailyGoal: DEFAULT_SETTINGS.dailyGoal,
+        ttsEnabled: true,
+      }
       const actual = saveSettings(input)
       expect(actual, `入力: ${JSON.stringify(input)}, 期待: ${JSON.stringify(expected)}`).toEqual(
         expected,
@@ -65,7 +69,11 @@ describe('settings', () => {
     const bads: unknown[] = ['true', 1, null, undefined]
     for (const bad of bads) {
       const input = { ttsEnabled: bad } as unknown as Partial<AppSettings>
-      const expected = { dailyGoal: DEFAULT_SETTINGS.dailyGoal, ttsEnabled: true }
+      const expected = {
+        showReading: true,
+        dailyGoal: DEFAULT_SETTINGS.dailyGoal,
+        ttsEnabled: true,
+      }
       const actual = saveSettings(input)
       expect(actual, `入力: ${JSON.stringify(input)}, 期待: ${JSON.stringify(expected)}`).toEqual(
         expected,
@@ -121,10 +129,23 @@ describe('settings', () => {
       },
     })
     const input = { dailyGoal: 50 }
-    const expected = { dailyGoal: 50, ttsEnabled: true }
+    const expected = { showReading: true, dailyGoal: 50, ttsEnabled: true }
     const actual = saveSettings(input)
     expect(actual, `入力: ${JSON.stringify(input)}, 期待: ${JSON.stringify(expected)}`).toEqual(
       expected,
     )
+  })
+  it('defaults reading to true and persists false', () => {
+    expect(getSettings().showReading, 'Input: unset').toBe(true)
+    expect(saveSettings({ showReading: false }).showReading, 'Input: false').toBe(false)
+    expect(getSettings().showReading, 'Input: reload after false').toBe(false)
+  })
+  it.each(['true', 1, null, undefined, {}, []])('ignores non-boolean reading %j', (bad) => {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ showReading: bad }))
+    expect(getSettings().showReading, 'Input stored: ' + JSON.stringify(bad)).toBe(true)
+    saveSettings({ showReading: false })
+    const actual = saveSettings({ showReading: bad } as unknown as Partial<AppSettings>)
+    expect(actual.showReading, 'Input update: ' + JSON.stringify(bad)).toBe(false)
+    expect(getSettings().showReading, 'Input reload: ' + JSON.stringify(bad)).toBe(false)
   })
 })

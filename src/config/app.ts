@@ -18,4 +18,6 @@ export const APP_CONFIG = {
   sessionsMax: 200,
   /** この日数以上バックアップがなければ、目立つ案内を出す */
   backupWarnDays: 7,
+  /** プロンプトの版。文面を変えたら上げる */
+  promptVersion: 2,
 } as const

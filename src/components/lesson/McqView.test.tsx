@@ -206,4 +206,30 @@ describe('McqView', () => {
       `入力: judgementあり / 期待値: role="status" の要素 0個 / 実際: ${statusRegions.length}個`,
     ).toBe(0)
   })
+  it.each([
+    { promptReading: 'スラマッ', showReading: undefined, expected: 'スラマッ' },
+    { promptReading: 'スラマッ', showReading: false, expected: null },
+    { promptReading: undefined, showReading: undefined, expected: null },
+  ])('reading display: %j', ({ promptReading, showReading, expected }) => {
+    const question = makeQuestion(promptReading === undefined ? {} : { promptReading })
+    const { container } = render(
+      <I18nProvider>
+        <McqView
+          question={question}
+          disabled={false}
+          judgement={null}
+          onSubmit={vi.fn()}
+          {...(showReading === undefined ? {} : { showReading })}
+        />
+      </I18nProvider>,
+    )
+    const actual = container.querySelector('.lq-reading')?.textContent ?? null
+    expect(actual, 'Input: ' + JSON.stringify({ promptReading, showReading })).toBe(expected)
+    if (expected !== null) {
+      expect(
+        container.querySelector('.lq-prompt')?.nextElementSibling?.className,
+        'Input: reading enabled',
+      ).toBe('lq-reading')
+    }
+  })
 })
