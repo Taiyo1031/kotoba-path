@@ -21,6 +21,29 @@
   outline: solid var(--color-primary);
   background: var(--color-primary-soft);
 }
+.home-words {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.home-words:hover {
+  background: var(--color-primary-soft);
+  text-decoration: underline;
+}
+.home-words:focus-visible {
+  outline: solid var(--color-primary-strong);
+  outline-offset: var(--space-1);
+  background: var(--color-primary-soft);
+}
 .home-backup {
   background: var(--color-accent-soft);
 }

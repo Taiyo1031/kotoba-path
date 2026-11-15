@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { setOnboarded } from '../app/onboarding'
+import { buildWordStats } from '../app/wordStats'
 import { createTranslator, I18nProvider } from '../i18n'
 import { StudyDataSchema } from '../schema'
 import { ROUTES, unitPath } from '../routes'
@@ -89,6 +90,69 @@ afterEach(() => {
 })
 
 describe('HomePage', () => {
+  it.each(['unseen', 'mature'] as const)('shows the word map with %s word counts', (state) => {
+    const data = makeData()
+    if (state === 'mature') {
+      data.progress.fsrs.w1 = {
+        due: '2026-12-15T03:00:00.000Z',
+        stability: 100,
+        difficulty: 3,
+        elapsedDays: 0,
+        scheduledDays: 30,
+        reps: 5,
+        lapses: 0,
+        state: 2,
+      }
+    }
+    useAppState.setState({ data })
+    show()
+    const stats = buildWordStats(data, new Date(now))
+    const input = { data, now }
+    const link = screen.queryByRole('link', { name: new RegExp(t('home.words')) })
+    check(input, '/words', link?.getAttribute('href'))
+    check(input, t('home.words'), link?.querySelector('strong')?.textContent)
+    check(
+      input,
+      `学習した${stats.seen}語・定着${stats.mature}語`,
+      link?.querySelector('span')?.textContent,
+    )
+  })
+  it.each(['missing', 'empty'] as const)('hides the word map for %s unit content', (content) => {
+    const data = makeData()
+    if (content === 'missing') data.content.units = {}
+    else data.content.units.u1!.words = []
+    useAppState.setState({ data })
+    show()
+    check(data, null, screen.queryByRole('link', { name: new RegExp(t('home.words')) }))
+  })
+  it('keeps four summary cards, review button and learning path around the word map', () => {
+    const data = makeData()
+    data.progress.fsrs.w1 = {
+      due: now,
+      stability: 1,
+      difficulty: 3,
+      elapsedDays: 0,
+      scheduledDays: 1,
+      reps: 1,
+      lapses: 0,
+      state: 2,
+    }
+    useAppState.setState({ data })
+    const { container } = show()
+    const summary = container.querySelector('.home-summary')
+    const link = screen.queryByRole('link', { name: new RegExp(t('home.words')) })
+    const review = screen.queryByRole('link', { name: t('home.review.button', { count: 1 }) })
+    check(data, 4, summary?.querySelectorAll('.home-summary-card').length)
+    check(data, true, summary?.nextElementSibling === link)
+    check(data, true, link?.nextElementSibling === review)
+    check(data, ROUTES.review, review?.getAttribute('href'))
+    check(
+      data,
+      t('home.path'),
+      screen.queryByRole('heading', { name: t('home.path') })?.textContent,
+    )
+    check(data, 3, screen.queryAllByRole('article').length)
+  })
   it.each(['loading', 'error'] as const)('shows %s', (status) => {
     useAppState.setState({ status })
     show()

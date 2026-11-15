@@ -5,6 +5,7 @@ import { buildHomeView } from '../app/home'
 import type { HomeUnitRow } from '../app/home'
 import { isOnboarded } from '../app/onboarding'
 import { getSettings } from '../app/settings'
+import { buildWordStats } from '../app/wordStats'
 import { useT } from '../i18n'
 import { ROUTES, unitPath } from '../routes'
 import { useAppState } from '../state/appState'
@@ -103,6 +104,7 @@ export function HomePage() {
       </div>
     )
   }
+  const wordStats = buildWordStats(data, getNow())
   const view = buildHomeView(data, {
     today: getToday(),
     now: getNow(),
@@ -134,6 +136,12 @@ export function HomePage() {
           {view.pace.unrealistic && <p role="alert">{t('home.pace.unrealistic')}</p>}
         </div>
       </div>
+      {wordStats.total > 0 && (
+        <Link className="home-words" to={ROUTES.words}>
+          <strong>{t('home.words')}</strong>
+          <span>{t('home.words.summary', { seen: wordStats.seen, mature: wordStats.mature })}</span>
+        </Link>
+      )}
       {view.dueReviewCount > 0 ? (
         <Link className="button" to={ROUTES.review}>
           {t('home.review.button', { count: view.dueReviewCount })}
