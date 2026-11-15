@@ -64,7 +64,7 @@ describe('学習量の見積もり', () => {
   it.each([
     [{ today: '2026-11-15', deadline: '2026-11-14', studyDaysPerWeek: 6 }, 3],
     [{ today: '2026-11-15', deadline: '2026-11-22', studyDaysPerWeek: 6 }, 3],
-    [{ today: '2026-01-01', deadline: '2027-01-01', studyDaysPerWeek: 7 }, 80],
+    [{ today: '2024-01-01', deadline: '2027-01-01', studyDaysPerWeek: 7 }, 80],
     [{ today: '2026-11-15', deadline: '2026-11-29', studyDaysPerWeek: 6, itemsPerUnit: 15 }, 8],
     [{ today: '2026-11-15', deadline: '2026-11-22', studyDaysPerWeek: 6, newItemsPerDay: 15 }, 5],
   ])('入力%jの単元数は%s', (input, expected) => {
@@ -170,7 +170,10 @@ describe.each([
         version: APP_CONFIG.importEnvelopeVersion,
       })
     }
-    expect(prompt.trim().split('\n').at(-1), `入力: ${prompt}`).toBe('- JSONとして正しいこと。')
+    expectIncludes(prompt, [
+      '- JSONとして正しいこと。',
+      '- 単語の reading がすべて入っていること(単元プロンプトの場合)。',
+    ])
   })
 })
 
@@ -183,4 +186,46 @@ it('両方の母語名をEnglishに差し替える', () => {
     expectIncludes(prompt, ['意味・説明は母語の English (en) で書く'])
     expect(prompt, `入力: ${JSON.stringify(english)}`).not.toContain('母語の 日本語')
   }
+})
+
+describe('プロンプト版と読み必須', () => {
+  it('母語が日本語のときはカナとローマ字の読み方を案内する', () => {
+    const jaPrompt = buildUnitPrompt(unitInput)
+    expectIncludes(jaPrompt, [
+      '【読み(reading)】',
+      'reading は必須。空にしない。',
+      'reading は、すべての words に必ず入れる。空にしない。',
+      'selamat → スラマッ',
+      '対象言語がラテン文字以外の文字体系のときは',
+      'カナの近似に加えて、ローマ字を / でつなぐ(例: カナ/romaji)',
+    ])
+    expect(
+      jaPrompt.indexOf('【読み(reading)】'),
+      `入力: ${JSON.stringify(unitInput)}`,
+    ).toBeLessThan(jaPrompt.indexOf('【スロット付きフレーズ】'))
+  })
+
+  it('母語が英語のときは母語の読者が読める表記を案内する', () => {
+    const enProfile = { ...profile, nativeLanguage: 'en', nativeLanguageName: 'English' }
+    const enPrompt = buildUnitPrompt({ ...unitInput, profile: enProfile })
+    expectIncludes(enPrompt, [
+      '【読み(reading)】',
+      'reading は、すべての words に必ず入れる。空にしない。',
+      '母語の読者が読める近似表記',
+    ])
+    expect(enPrompt, `入力: ${JSON.stringify(enProfile)}`).not.toContain('スラマッ')
+    expect(enPrompt, `入力: ${JSON.stringify(enProfile)}`).not.toContain('カナ/romaji')
+  })
+
+  it('単元プロンプトの例に reading: "" が含まれない', () => {
+    const prompt = buildUnitPrompt(unitInput)
+    expect(prompt, `入力: ${JSON.stringify(unitInput)}`).not.toContain('"reading": ""')
+    expectIncludes(prompt, ['"reading": "読みの例"'])
+  })
+
+  it('骨組み・単元の両方のプロンプトが、プロンプトの版: 2で終わる', () => {
+    for (const prompt of [buildSkeletonPrompt(skeletonInput), buildUnitPrompt(unitInput)]) {
+      expect(prompt.slice(-'プロンプトの版: 2'.length), `入力: ${prompt}`).toBe('プロンプトの版: 2')
+    }
+  })
 })

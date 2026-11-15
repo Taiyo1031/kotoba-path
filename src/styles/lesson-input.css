@@ -1,0 +1,91 @@
+.li-view {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.li-heading {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.li-prompt,
+.li-instruction {
+  margin: 0;
+  font-size: var(--font-size-base);
+}
+
+.li-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.li-input {
+  width: 100%;
+  min-height: var(--button-min-height, var(--space-11));
+  padding: var(--space-2) var(--space-3);
+  border: solid var(--color-border, var(--color-primary));
+  border-radius: var(--radius-md);
+  background: var(--color-surface, var(--color-primary));
+  color: var(--color-text, var(--color-primary));
+  font-size: var(--font-size-base);
+}
+
+.li-input:focus-visible {
+  outline: solid var(--color-primary);
+  outline-offset: var(--space-1);
+}
+
+.li-input-success {
+  border-color: var(--color-success, var(--color-primary));
+  background: var(--color-success-subtle, var(--color-surface, var(--color-primary)));
+}
+
+.li-input-danger {
+  border-color: var(--color-danger, var(--color-primary));
+  background: var(--color-danger-subtle, var(--color-surface, var(--color-primary)));
+}
+
+.li-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.li-hint-text,
+.li-close-hint,
+.li-judgement {
+  margin: 0;
+  font-size: var(--font-size-base);
+}
+
+.li-answer-row,
+.li-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  min-height: var(--button-min-height, var(--space-11));
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-alt, var(--color-surface, var(--color-primary)));
+}
+
+.li-answer-row-success {
+  border: solid var(--color-success, var(--color-primary));
+  background: var(--color-success-subtle, var(--color-surface, var(--color-primary)));
+}
+
+.li-answer-row-danger {
+  border: solid var(--color-danger, var(--color-primary));
+  background: var(--color-danger-subtle, var(--color-surface, var(--color-primary)));
+}
+
+.li-tile {
+  min-height: var(--button-min-height, var(--space-11));
+  min-width: var(--space-11);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--font-size-base);
+}

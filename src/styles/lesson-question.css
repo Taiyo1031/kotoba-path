@@ -1,0 +1,130 @@
+.lq-mcq,
+.lq-cloze {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.lq-prompt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.lq-prompt {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  line-height: 1.5;
+}
+
+.lq-reading {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.lq-audio-button {
+  flex-shrink: 0;
+}
+
+.lq-audio-main {
+  justify-self: start;
+}
+
+.lq-instruction {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.lq-sentence {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  line-height: 1.8;
+}
+
+.lq-blank {
+  display: inline-block;
+  min-width: 4ch;
+  text-align: center;
+}
+
+.lq-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 40rem) {
+  .lq-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.lq-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: left;
+}
+
+.lq-option-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2ch;
+  border-radius: var(--radius-md);
+}
+
+.lq-option--success {
+  background-color: var(--color-success-soft);
+}
+
+.lq-option--danger {
+  background-color: var(--color-danger-soft);
+}
+
+.lq-typing-row {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (min-width: 30rem) {
+  .lq-typing-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+}
+
+.lq-input {
+  width: 100%;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-lg);
+}
+
+.lq-input--success {
+  background-color: var(--color-success-soft);
+}
+
+.lq-input--danger {
+  background-color: var(--color-danger-soft);
+}
+
+.lq-check-button {
+  justify-self: start;
+}
+
+@media (min-width: 30rem) {
+  .lq-check-button {
+    justify-self: end;
+  }
+}
+
+.lq-feedback {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.lq-hint {
+  margin: 0;
+}

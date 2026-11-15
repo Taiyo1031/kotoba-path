@@ -1,0 +1,67 @@
+.settings-page {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.settings-section {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-heading {
+  font-size: var(--font-size-lg);
+}
+
+.settings-field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.settings-checkbox-field {
+  align-items: center;
+}
+
+.settings-note {
+  color: var(--color-primary);
+}
+
+.settings-saved {
+  min-height: var(--font-size-lg);
+}
+
+.settings-llm input:disabled {
+  opacity: 0.6;
+}
+
+.goal-settings {
+  min-width: 0;
+  gap: var(--space-4);
+}
+
+.goal-settings fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-2);
+}
+
+.goal-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.goal-settings .welcome-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+}
+
+.goal-settings input[type='date'] {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}

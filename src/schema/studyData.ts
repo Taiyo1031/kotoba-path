@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { APP_CONFIG } from '../config/app'
 import { IsoDateTimeSchema } from './common'
 import { UnitContentSchema } from './content'
+import { GuideSchema } from './guide'
 import { PlanSchema } from './plan'
 import { ProfileSchema } from './profile'
 import { ProgressSchema } from './progress'
@@ -14,7 +15,11 @@ export const StudyDataSchema = z.object({
   profile: ProfileSchema,
   plan: PlanSchema,
   content: z
-    .object({ units: z.record(z.string().min(1), UnitContentSchema) })
+    .object({
+      units: z.record(z.string().min(1), UnitContentSchema),
+      /** 文字と発音のガイド(任意。対象言語ごとに1つ) */
+      guide: GuideSchema.optional(),
+    })
     .default({ units: {} }),
   progress: ProgressSchema,
 })

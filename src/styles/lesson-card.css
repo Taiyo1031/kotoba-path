@@ -1,0 +1,213 @@
+/* レッスン画面の出題コンポーネント共通スタイル(クラス名は lc- 接頭辞) */
+
+.lc-intro,
+.lc-flashcard,
+.lc-feedback {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.lc-intro-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.lc-intro-lemma {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.lc-intro-reading {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-muted);
+}
+
+.lc-intro-pos {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.lc-intro-badge {
+  font-size: var(--font-size-sm);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-warning);
+  color: var(--color-text);
+}
+
+.lc-section-title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.lc-intro-meaning {
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+}
+
+.lc-intro-sentence {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+}
+
+.lc-intro-sentence-target {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+}
+
+.lc-intro-sentence-meaning {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.lc-intro-related {
+  margin: 0;
+  padding-left: var(--space-4);
+  display: grid;
+  gap: var(--space-1);
+}
+
+.lc-intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.lc-intro-audio {
+  margin-left: auto;
+}
+
+.lc-flashcard {
+  align-content: start;
+}
+
+.lc-flashcard-face {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+
+.lc-flashcard-text {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.lc-flashcard-flip {
+  justify-self: start;
+}
+
+.lc-flashcard-audio {
+  margin-left: auto;
+}
+
+.lc-flashcard-grades {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.lc-flashcard-grade {
+  justify-self: stretch;
+}
+
+.lc-flashcard-grade-active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text);
+}
+
+.lc-feedback-status {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+}
+
+.lc-feedback-correct {
+  background: var(--color-success);
+  color: var(--color-text);
+}
+
+.lc-feedback-close {
+  background: var(--color-warning);
+  color: var(--color-text);
+}
+
+.lc-feedback-incorrect {
+  background: var(--color-danger);
+  color: var(--color-text);
+}
+
+.lc-feedback-title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+
+.lc-feedback-hint,
+.lc-feedback-answer {
+  margin: 0;
+  font-size: var(--font-size-md);
+}
+
+.lc-feedback-note {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+}
+
+.lc-feedback-note-title {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.lc-feedback-note-hint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.lc-feedback-example {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+}
+
+.lc-feedback-example-target {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+}
+
+.lc-feedback-example-meaning {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.lc-feedback-next {
+  justify-self: start;
+}

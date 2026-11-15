@@ -20,16 +20,17 @@ describe('routes', () => {
     expect(lessonPath(unitId, stepId), `入力: ${JSON.stringify({ unitId, stepId })}`).toBe(expected)
   })
 
-  it('NAV_ITEMS contains only home, review, data, settings with matching label keys', () => {
+  it('NAV_ITEMS contains only home, review, words, data, settings with matching label keys', () => {
     expect(NAV_ITEMS, '入力: NAV_ITEMS').toEqual([
       { path: '/', labelKey: 'nav.home' },
       { path: '/review', labelKey: 'nav.review' },
+      { path: '/words', labelKey: 'nav.words' },
       { path: '/data', labelKey: 'nav.data' },
       { path: '/settings', labelKey: 'nav.settings' },
     ])
   })
 
-  it.each([ROUTES.welcome, ROUTES.unit, ROUTES.lesson, ROUTES.debug])(
+  it.each([ROUTES.welcome, ROUTES.intro, ROUTES.unit, ROUTES.lesson, ROUTES.debug, ROUTES.guide])(
     'NAV_ITEMS excludes %j',
     (path) => {
       expect(
@@ -39,13 +40,17 @@ describe('routes', () => {
     },
   )
 
-  it('defines all eight route patterns', () => {
+  it('defines all eleven route patterns', () => {
+    expect(Object.keys(ROUTES), '入力: ROUTES').toHaveLength(11)
     expect(ROUTES, '入力: ROUTES').toEqual({
       welcome: '/welcome',
+      intro: '/intro',
       home: '/',
       unit: '/unit/:id',
       lesson: '/lesson/:unitId/:stepId',
       review: '/review',
+      words: '/words',
+      guide: '/guide',
       data: '/data',
       settings: '/settings',
       debug: '/debug',

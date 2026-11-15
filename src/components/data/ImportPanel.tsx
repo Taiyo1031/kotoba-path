@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { getAppStore } from '../../db'
 import { useT } from '../../i18n'
 import { commitImport, parseImportText } from '../../io/importer'
 import type { ImportPreview } from '../../io/importer'
 import type { StudyData } from '../../schema'
 import { useAppState } from '../../state/appState'
+import { buildFixPrompt } from '../../prompts'
+import { copyText } from '../../utils/clipboard'
 
 export function ImportPanel() {
   const t = useT()
@@ -15,10 +17,13 @@ export function ImportPanel() {
   const preview = validatedData === data ? savedPreview : null
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
+  const [fixPrompt, setFixPrompt] = useState<string | null>(null)
+  const fixRef = useRef<HTMLTextAreaElement>(null)
   const update = (value: string) => {
     setText(value)
     setPreview(null)
     setMessage('')
+    setFixPrompt(null)
   }
   const run = async (action: () => Promise<void>) => {
     setBusy(true)
@@ -32,11 +37,13 @@ export function ImportPanel() {
     }
   }
   const validate = () => {
+    setFixPrompt(null)
     setValidatedData(data)
     const context = {
       targetLanguage: data?.profile.targetLanguage ?? '',
       planUnitIds: data?.profile && data.plan ? data.plan.units.map((u) => u.id) : [],
       existingPlan: data?.plan,
+      existingGuide: data?.content.guide,
       unitIdsWithData: new Set([
         ...Object.keys(data?.content.units ?? {}),
         ...Object.keys(data?.progress.unitProgress ?? {}),
@@ -105,7 +112,9 @@ export function ImportPanel() {
                     ? 'data.prompt.skeleton'
                     : preview.kind === 'unit'
                       ? 'data.prompt.unit'
-                      : 'data.invalid',
+                      : preview.kind === 'guide'
+                        ? 'data.prompt.guide'
+                        : 'data.invalid',
                 )}
               </h3>
               {preview.kind !== 'invalid' && (
@@ -125,6 +134,36 @@ export function ImportPanel() {
                   </li>
                 ))}
               </ul>
+              {preview.issues.some((issue) => issue.severity === 'error') && (
+                <button
+                  onClick={() => {
+                    const prompt = buildFixPrompt({
+                      issues: preview.issues
+                        .filter((issue) => issue.severity === 'error')
+                        .map(({ path, message }) => ({ path, message })),
+                      originalText: text,
+                    })
+                    setFixPrompt(prompt)
+                    void copyText(prompt, fixRef.current)
+                  }}
+                >
+                  {t('data.fix.button')}
+                </button>
+              )}
+              {fixPrompt && (
+                <>
+                  <h4 id="fix-prompt-title">{t('data.fix.title')}</h4>
+                  <p>{t('data.fix.hint')}</p>
+                  <textarea
+                    id="fix-prompt"
+                    aria-labelledby="fix-prompt-title"
+                    ref={fixRef}
+                    readOnly
+                    rows={8}
+                    value={fixPrompt}
+                  />
+                </>
+              )}
               {preview.ok && <p>{t('data.valid')}</p>}
               {diffs &&
                 Object.entries(diffs).map(([key, diff]) => (
@@ -151,6 +190,36 @@ export function ImportPanel() {
                     {preview.rewrites.map((r, i) => (
                       <li key={i}>
                         <code>{r.path}</code>: {r.from} → {r.to}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+              {preview.kind === 'guide' && preview.ok && preview.guide && (
+                <details open>
+                  <summary>{t('data.sample.title')}</summary>
+                  <ul>
+                    {preview.guide.sounds.slice(0, 5).map((sound) => (
+                      <li key={sound.id}>
+                        {sound.grapheme} → {sound.reading}
+                        {sound.note && `: ${sound.note}`}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+              {preview.kind === 'unit' && preview.ok && preview.content && (
+                <details open>
+                  <summary>{t('data.sample.title')}</summary>
+                  <ul>
+                    {preview.content.words.slice(0, 5).map((word) => (
+                      <li key={word.id}>
+                        {word.lemma}
+                        {word.reading && ` (${word.reading})`}
+                        {word.meaning[0] && `: ${word.meaning[0]}`}
+                        {word.uncertain && (
+                          <span className="data-warning">{t('data.sample.uncertain')}</span>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -200,6 +269,27 @@ export function ImportPanel() {
             </li>
           ))}
         </ul>
+        {data?.content.guide && (
+          <ul className="data-unit-list">
+            <li>
+              <span>{t('data.guide.label')}</span>
+              <button
+                disabled={data.content.guide.verified || busy}
+                onClick={() => {
+                  const guide = data.content.guide
+                  if (guide)
+                    void run(async () => {
+                      await getAppStore().saveGuide({ ...guide, verified: true })
+                      setPreview(null)
+                      await reload()
+                    })
+                }}
+              >
+                {t(data.content.guide.verified ? 'data.verified' : 'data.verify')}
+              </button>
+            </li>
+          </ul>
+        )}
       </div>
     </section>
   )

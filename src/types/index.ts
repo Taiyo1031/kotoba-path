@@ -15,6 +15,7 @@ export type {
   PlanUnit,
   Plan,
   UiLanguage,
+  StartLevel,
   Goal,
   Profile,
   FsrsRecord,
@@ -26,5 +27,10 @@ export type {
   StudyData,
   SkeletonEnvelope,
   UnitEnvelope,
+  GuideExample,
+  GuideSound,
+  GuideRule,
+  Guide,
+  GuideEnvelope,
   ValidationIssue,
 } from '../schema'

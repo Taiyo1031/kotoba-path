@@ -1,22 +1,31 @@
 import { useRef, useState } from 'react'
 import { useI18n, useT } from '../../i18n'
 import { getNativeLanguage, getTargetLanguage } from '../../config/languages'
-import { buildSkeletonPrompt, buildUnitPrompt } from '../../prompts'
+import { buildGuidePrompt, buildSkeletonPrompt, buildUnitPrompt } from '../../prompts'
 import { useAppState } from '../../state/appState'
 import { copyText } from '../../utils/clipboard'
 import { downloadTextFile } from '../../utils/download'
+import { getToday } from '../../app/clock'
+import { nextPromptAction } from '../../app/promptFlow'
+import '../../styles/promptFlow.css'
 
 export function PromptPanel() {
   const t = useT()
   const { language } = useI18n()
   const data = useAppState((state) => state.data)
-  const [mode, setMode] = useState('skeleton')
+  const [mode, setMode] = useState<'' | 'skeleton' | 'unit' | 'guide'>('')
   const [unitId, setUnitId] = useState('')
   const [part, setPart] = useState<'' | 'A' | 'B'>('')
   const [message, setMessage] = useState('')
   const textarea = useRef<HTMLTextAreaElement>(null)
   const profile = data?.profile
-  const unit = data?.plan.units.find((entry) => entry.id === unitId) ?? data?.plan.units[0]
+  const units = data?.plan.units ?? []
+  const action = nextPromptAction(data)
+  const effectiveMode: 'skeleton' | 'unit' | 'guide' =
+    mode !== '' ? mode : action.kind === 'unit' && units.length > 0 ? 'unit' : 'skeleton'
+  const effectiveUnitId =
+    unitId !== '' ? unitId : action.kind === 'unit' ? action.unitId : (units[0]?.id ?? '')
+  const unit = units.find((entry) => entry.id === effectiveUnitId)
   let prompt = ''
   if (profile) {
     const promptProfile = {
@@ -28,21 +37,25 @@ export function PromptPanel() {
       nativeLanguageName:
         getNativeLanguage(profile.nativeLanguage)?.names[language] ?? profile.nativeLanguage,
     }
-    const now = new Date()
-    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    const today = getToday()
     prompt =
-      mode === 'skeleton'
-        ? buildSkeletonPrompt({ profile: promptProfile, today })
-        : unit
-          ? buildUnitPrompt({
-              profile: promptProfile,
-              unit,
-              ...(part ? { part } : {}),
-              existingWordIds: Object.entries(data.content.units)
-                .filter(([id]) => id !== unit.id)
-                .flatMap(([, content]) => content.words.map((word) => word.id)),
-            })
-          : ''
+      effectiveMode === 'guide'
+        ? buildGuidePrompt({
+            profile: promptProfile,
+            unitHints: data.plan.units.map((u) => ({ title: u.title, keywords: u.keywords })),
+          })
+        : effectiveMode === 'skeleton'
+          ? buildSkeletonPrompt({ profile: promptProfile, today })
+          : unit
+            ? buildUnitPrompt({
+                profile: promptProfile,
+                unit,
+                ...(part ? { part } : {}),
+                existingWordIds: Object.entries(data.content.units)
+                  .filter(([id]) => id !== unit.id)
+                  .flatMap(([, content]) => content.words.map((word) => word.id)),
+              })
+            : ''
   }
   return (
     <section aria-labelledby="prompt-title">
@@ -52,11 +65,24 @@ export function PromptPanel() {
           <p>{t('data.profileRequired')}</p>
         ) : (
           <>
+            <div className="flow-banner">
+              <h3>{t('flow.title')}</h3>
+              <p>
+                {action.kind === 'skeleton'
+                  ? t('flow.skeleton')
+                  : action.kind === 'unit'
+                    ? t('flow.unit', { title: action.title })
+                    : t('flow.done')}
+              </p>
+              {(action.kind === 'unit' || action.kind === 'done') && (
+                <p>{t('flow.progress', { done: action.prepared, total: action.total })}</p>
+              )}
+            </div>
             <div className="data-actions">
-              {(['skeleton', 'unit'] as const).map((value) => (
+              {(['skeleton', 'unit', 'guide'] as const).map((value) => (
                 <button
                   key={value}
-                  aria-pressed={mode === value}
+                  aria-pressed={effectiveMode === value}
                   onClick={() => {
                     setMode(value)
                     setMessage('')
@@ -66,7 +92,10 @@ export function PromptPanel() {
                 </button>
               ))}
             </div>
-            {mode === 'unit' && (
+            {effectiveMode === 'guide' && (
+              <p className="data-hint">{t('data.prompt.guide.hint')}</p>
+            )}
+            {effectiveMode === 'unit' && (
               <div className="data-actions">
                 <label>
                   {t('data.prompt.selectUnit')}
@@ -120,7 +149,7 @@ export function PromptPanel() {
                 onClick={() => {
                   try {
                     downloadTextFile(
-                      `kotoba-path-prompt-${mode === 'skeleton' ? 'skeleton' : unit?.id}.md`,
+                      `kotoba-path-prompt-${effectiveMode === 'guide' ? 'guide' : effectiveMode === 'skeleton' ? 'skeleton' : unit?.id}.md`,
                       prompt,
                       'text/markdown',
                     )

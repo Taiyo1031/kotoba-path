@@ -1,0 +1,39 @@
+.intro-page {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.intro-progress {
+  font-size: var(--font-size-lg);
+}
+
+.intro-card {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow-wrap: anywhere;
+}
+
+.intro-card h2 {
+  font-size: var(--font-size-lg);
+}
+
+.intro-card h2,
+.intro-card p {
+  margin: 0;
+}
+
+.intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  justify-content: flex-end;
+}
+
+.intro-actions .button {
+  min-width: 2.75rem;
+  max-width: 100%;
+}

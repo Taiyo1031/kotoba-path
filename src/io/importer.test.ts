@@ -1,3 +1,4 @@
+import { GuideEnvelopeSchema, GuideSchema } from '../schema/guide'
 import { describe, it, expect } from 'vitest'
 import { createAppStore } from '../db'
 import { PlanUnitSchema, ProgressSchema, ProfileSchema, UnitEnvelopeSchema } from '../schema'
@@ -260,6 +261,105 @@ describe('commitImport', () => {
       await expect(commitImport(unit(), store, now)).rejects.toThrow()
       expect(await store.listUnitContentIds()).toEqual([])
       expect(await store.loadPlan()).toBeUndefined()
+    } finally {
+      store.close()
+    }
+  })
+})
+
+function makeGuide() {
+  return GuideSchema.parse({
+    generatedBy: { tool: 'test', at: '2026-11-15T00:00:00.000Z' },
+    intro: 'Guide',
+    sounds: Array.from({ length: 10 }, (_, i) => ({
+      id: String(i),
+      grapheme: String(i),
+      reading: String(i),
+    })),
+    rules: [{ id: 'r1', title: 'Rule', body: 'Read aloud' }],
+  })
+}
+
+function guideEnvelope(count = 10) {
+  return GuideEnvelopeSchema.parse({
+    ...makeGuide(),
+    format: 'lang-study-guide',
+    sounds: Array.from({ length: count }, (_, i) => ({
+      id: String(i),
+      grapheme: String(i),
+      reading: String(i),
+    })),
+  })
+}
+
+describe('guide import', () => {
+  it.each([undefined, 7])('previews guide with existing version %s', (version) => {
+    const input = guideEnvelope()
+    const result = parse(input, {
+      ...context,
+      ...(version === undefined ? {} : { existingGuide: { ...makeGuide(), version } }),
+    })
+    expect(result, JSON.stringify({ input, version })).toMatchObject({
+      kind: 'guide',
+      ok: true,
+      counts: { sounds: 10, rules: 1 },
+      issues: [],
+      guide: {
+        ...makeGuide(),
+        version: (version ?? 0) + 1,
+        verified: false,
+        generatedBy: { tool: 'import', at: now },
+      },
+    })
+  })
+  it.each(['duplicate', 'reference'] as const)(
+    'rejects %s errors and cannot commit',
+    async (error) => {
+      const input = guideEnvelope()
+      if (error === 'duplicate') input.sounds[1]!.id = input.sounds[0]!.id
+      else input.sounds[0]!.confusableWith = ['missing']
+      const result = parse(input)
+      const message = JSON.stringify(input)
+      expect(result.ok, message).toBe(false)
+      expect(result.issues, message).toContainEqual(
+        expect.objectContaining({
+          severity: 'error',
+          path: error === 'duplicate' ? 'sounds[1].id' : 'sounds[0].confusableWith[0]',
+        }),
+      )
+      expect(result, message).not.toHaveProperty('guide')
+      const store = createAppStore('test-guide-error-' + error)
+      try {
+        await expect(commitImport(result, store, now), message).rejects.toThrow()
+        expect(await store.loadGuide(), message).toBeUndefined()
+      } finally {
+        store.close()
+      }
+    },
+  )
+  it.each([5, 41])('warns for %s sounds', (count) => {
+    const input = guideEnvelope(count)
+    expect(parse(input), JSON.stringify(input)).toMatchObject({
+      kind: 'guide',
+      ok: true,
+      counts: { sounds: count },
+      issues: [{ path: 'sounds', severity: 'warning', message: '音の数が10〜40の範囲外です' }],
+    })
+  })
+  it('commits without a skeleton and rejects missing content', async () => {
+    const input = guideEnvelope()
+    const result = parse(input, { ...context, planUnitIds: [] })
+    const message = JSON.stringify(input)
+    expect(result.kind, message).toBe('guide')
+    if (result.kind !== 'guide') throw new Error(JSON.stringify(result))
+    const store = createAppStore('test-guide-commit-1002')
+    try {
+      await commitImport(result, store, now)
+      expect(await store.loadGuide(), message).toEqual(result.guide)
+      await expect(
+        commitImport({ ...result, guide: undefined }, store, now),
+        message,
+      ).rejects.toThrow('取り込む内容がありません')
     } finally {
       store.close()
     }
