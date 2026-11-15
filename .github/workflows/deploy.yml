@@ -1,10 +1,11 @@
 # GitHub Pages へデプロイするワークフロー。
 name: Deploy to GitHub Pages
 
-# main へのプッシュと手動実行で発火する。
+# main と、確認用の feat/phase3 へのプッシュと、手動実行で発火する。
+# (main が空の間は feat/phase3 から公開する。main に統合したら feat/phase3 は外す。)
 on:
   push:
-    branches: [main]
+    branches: [main, feat/phase3]
   workflow_dispatch:
 
 # Pages デプロイに必要な権限を指定する。
