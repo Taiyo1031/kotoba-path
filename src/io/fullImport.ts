@@ -125,13 +125,17 @@ export function mergeStudyData(current: StudyData, incoming: StudyData): StudyDa
       : a
   const sessions = new Map(current.progress.sessions.map((session) => [session.id, session]))
   for (const session of incoming.progress.sessions) sessions.set(session.id, session)
+  const guide = incoming.content.guide ?? current.content.guide
   return {
     format: APP_CONFIG.dataFormat,
     version: APP_CONFIG.dataVersion,
     meta: incoming.meta,
     profile: current.profile,
     plan: { units: [...units.values()] },
-    content: { units: { ...current.content.units, ...incoming.content.units } },
+    content: {
+      units: { ...current.content.units, ...incoming.content.units },
+      ...(guide !== undefined ? { guide } : {}),
+    },
     progress: {
       fsrs,
       unitProgress,

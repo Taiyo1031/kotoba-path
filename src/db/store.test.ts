@@ -1,4 +1,5 @@
-﻿import { openDB } from 'idb'
+import { GuideSchema } from '../schema/guide'
+import { openDB } from 'idb'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { APP_CONFIG } from '../config/app'
 import { ProfileSchema, ProgressSchema, StudyDataSchema, UnitContentSchema } from '../schema'
@@ -350,5 +351,42 @@ describe('requestPersistentStorage', () => {
       },
     })
     expect(await requestPersistentStorage(), '入力: persistの例外').toBe('denied')
+  })
+})
+
+function makeGuide() {
+  return GuideSchema.parse({
+    generatedBy: { tool: 'test', at: '2026-11-15T00:00:00.000Z' },
+    intro: 'Guide',
+    sounds: Array.from({ length: 10 }, (_, i) => ({
+      id: String(i),
+      grapheme: String(i),
+      reading: String(i),
+    })),
+    rules: [{ id: 'r1', title: 'Rule', body: 'Read aloud' }],
+  })
+}
+
+describe('guide storage', () => {
+  it('saves guides, includes them in study data, removes absent guides and resets', async () => {
+    const store = createAppStore('test-guide-storage-1002')
+    stores.push(store)
+    const guide = makeGuide()
+    const input = JSON.stringify(guide)
+    await store.saveGuide(guide)
+    expect(await store.loadGuide(), input).toEqual(guide)
+    const data = makeData()
+    data.content.guide = guide
+    await store.saveStudyData(data)
+    expect((await store.loadStudyData(now))?.content.guide, input).toEqual(guide)
+    delete data.content.guide
+    await store.saveStudyData(data)
+    expect(await store.loadGuide(), 'input: study data without guide').toBeUndefined()
+    expect((await store.loadStudyData(now))?.content, JSON.stringify(data)).not.toHaveProperty(
+      'guide',
+    )
+    await store.saveGuide(guide)
+    await store.resetAll()
+    expect(await store.loadGuide(), 'input: resetAll after saveGuide').toBeUndefined()
   })
 })

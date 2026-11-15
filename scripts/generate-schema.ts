@@ -1,12 +1,18 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { z } from 'zod'
-import { SkeletonEnvelopeSchema, StudyDataSchema, UnitEnvelopeSchema } from '../src/schema'
+import {
+  GuideEnvelopeSchema,
+  SkeletonEnvelopeSchema,
+  StudyDataSchema,
+  UnitEnvelopeSchema,
+} from '../src/schema'
 
 const outputDirectory = new URL('../public/schema/', import.meta.url)
 const schemas = [
   { name: 'study-data', title: 'StudyData', schema: StudyDataSchema },
   { name: 'skeleton', title: 'SkeletonEnvelope', schema: SkeletonEnvelopeSchema },
   { name: 'unit', title: 'UnitEnvelope', schema: UnitEnvelopeSchema },
+  { name: 'guide', title: 'GuideEnvelope', schema: GuideEnvelopeSchema },
 ]
 
 mkdirSync(outputDirectory, { recursive: true })

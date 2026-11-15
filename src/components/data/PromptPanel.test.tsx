@@ -285,3 +285,50 @@ describe('PromptPanel', () => {
     check('manual unit selection', 'u3', select.value)
   })
 })
+
+describe('guide prompt', () => {
+  it('selects guide explicitly, hides unit controls and copies the full preview', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    vi.stubGlobal('navigator', { clipboard: { writeText } })
+    useAppState.setState({ data: makeData(['u1'], []) })
+    show()
+    const button = screen.getByRole('button', { name: t('data.prompt.guide') })
+    check('automatic unit mode', 'false', button.getAttribute('aria-pressed'))
+    await user.click(button)
+    check('guide selected', 'true', button.getAttribute('aria-pressed'))
+    const preview = screen.getByRole<HTMLTextAreaElement>('textbox')
+    for (const text of ['# 文字と発音のガイドを作成', 'lang-study-guide', '【読み(reading)】']) {
+      check({ mode: 'guide', text }, true, preview.value.includes(text))
+    }
+    check('guide unit selector', null, screen.queryByLabelText(t('data.prompt.selectUnit')))
+    check('guide part selector', null, screen.queryByLabelText(t('data.prompt.part')))
+    check(
+      'guide hint',
+      t('data.prompt.guide.hint'),
+      screen.getByText(t('data.prompt.guide.hint')).textContent,
+    )
+    await user.click(screen.getByRole('button', { name: t('data.copy') }))
+    check('copy guide preview', [[preview.value]], writeText.mock.calls)
+    await user.click(screen.getByRole('button', { name: t('data.prompt.unit') }))
+    check(
+      'return to unit',
+      'u1',
+      screen.getByLabelText<HTMLSelectElement>(t('data.prompt.selectUnit')).value,
+    )
+  })
+
+  it('keeps the automatic skeleton default without units', () => {
+    useAppState.setState({ data: makeData([], []) })
+    show()
+    check(
+      'automatic skeleton mode',
+      'false',
+      screen
+        .getByRole('button', {
+          name: t('data.prompt.guide'),
+        })
+        .getAttribute('aria-pressed'),
+    )
+  })
+})

@@ -5,6 +5,7 @@ export const ROUTES = {
   lesson: '/lesson/:unitId/:stepId',
   review: '/review',
   words: '/words',
+  guide: '/guide',
   data: '/data',
   settings: '/settings',
   debug: '/debug',

@@ -56,7 +56,8 @@
   outline: solid var(--color-primary);
   background: var(--color-primary-soft);
 }
-.home-words {
+.home-words,
+.home-guide {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -70,14 +71,24 @@
   text-decoration: none;
   overflow-wrap: anywhere;
 }
-.home-words:hover {
+.home-words:hover,
+.home-guide:hover {
   background: var(--color-primary-soft);
   text-decoration: underline;
 }
-.home-words:focus-visible {
+.home-words:focus-visible,
+.home-guide:focus-visible {
   outline: solid var(--color-primary-strong);
   outline-offset: var(--space-1);
   background: var(--color-primary-soft);
+}
+.home-guide--prepare {
+  border: solid var(--color-primary);
+}
+@media (max-width: 30rem) {
+  .home-guide > span {
+    flex-basis: 100%;
+  }
 }
 .home-backup {
   background: var(--color-accent-soft);

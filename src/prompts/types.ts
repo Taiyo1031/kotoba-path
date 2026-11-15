@@ -34,3 +34,13 @@ export interface UnitPromptInput {
   existingWordIds?: string[]
   allowedTags?: string[]
 }
+
+export interface GuidePromptUnitHint {
+  title: string
+  keywords: string[]
+}
+export interface GuidePromptInput {
+  profile: PromptProfile
+  /** コースの単元の題名とキーワード。最初の単語を読むために必要な音を、優先して選ばせる */
+  unitHints?: GuidePromptUnitHint[]
+}

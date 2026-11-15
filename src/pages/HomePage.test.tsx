@@ -92,6 +92,86 @@ afterEach(() => {
 
 describe('HomePage', () => {
   it.each([
+    { guide: true, units: true, words: true },
+    { guide: true, units: false, words: false },
+    { guide: false, units: true, words: true },
+    { guide: false, units: true, words: false },
+    { guide: false, units: false, words: false },
+  ])('shows the guide entry for %j', ({ guide, units, words }) => {
+    const data = makeData()
+    if (guide) {
+      data.content.guide = {
+        version: 1,
+        verified: false,
+        generatedBy: { tool: 'test', at: now },
+        intro: 'Guide',
+        sounds: [],
+        rules: [],
+      }
+    }
+    if (!units) data.plan.units = []
+    if (!words) data.content.units = {}
+    useAppState.setState({ data: StudyDataSchema.parse(data) })
+    show()
+    const input = { guide, units, words }
+    const link = screen.queryByRole('link', { name: new RegExp(t('home.guide')) })
+    if (!guide && !units) {
+      check(input, null, link)
+      return
+    }
+    check(input, guide ? '/guide' : '/data', link?.getAttribute('href'))
+    check(input, t('home.guide'), link?.querySelector('strong')?.textContent)
+    check(
+      input,
+      t(guide ? 'home.guide.open' : 'home.guide.prepare'),
+      link?.querySelector('span')?.textContent,
+    )
+    check(input, true, link?.classList.contains('home-guide'))
+    check(input, !guide, link?.classList.contains('home-guide--prepare'))
+    check(input, t('home.review.none'), link?.nextElementSibling?.textContent)
+  })
+
+  it('preserves the goal, summary, word map, review and path with a guide', () => {
+    const data = makeData()
+    data.content.guide = {
+      version: 1,
+      verified: false,
+      generatedBy: { tool: 'test', at: now },
+      intro: 'Guide',
+      sounds: [],
+      rules: [],
+    }
+    data.progress.fsrs.w1 = {
+      due: now,
+      stability: 1,
+      difficulty: 3,
+      elapsedDays: 0,
+      scheduledDays: 1,
+      reps: 1,
+      lapses: 0,
+      state: 2,
+    }
+    useAppState.setState({ data })
+    const { container } = show()
+    const input = { data, now }
+    const goal = screen.queryByRole('region', { name: t('home.goal.title') })
+    const summary = container.querySelector('.home-summary')
+    const words = container.querySelector('.home-words')
+    const guide = container.querySelector('.home-guide')
+    const review = screen.queryByRole('link', { name: t('home.review.button', { count: 1 }) })
+    check(input, true, goal !== null)
+    check(input, true, goal?.nextElementSibling === summary)
+    check(input, 4, summary?.querySelectorAll('.home-summary-card').length)
+    check(input, '/words', words?.getAttribute('href'))
+    check(input, true, summary?.nextElementSibling === words)
+    check(input, true, words?.nextElementSibling === guide)
+    check(input, true, guide?.nextElementSibling === review)
+    check(input, '/review', review?.getAttribute('href'))
+    check(input, true, screen.queryByRole('heading', { name: t('home.path') }) !== null)
+    check(input, 3, screen.queryAllByRole('article').length)
+  })
+
+  it.each([
     { deadline: '2026-11-20', days: 5 },
     { deadline: '2026-11-15', days: 0 },
     { deadline: '2026-11-14', days: -1 },
@@ -192,7 +272,10 @@ describe('HomePage', () => {
     const review = screen.queryByRole('link', { name: t('home.review.button', { count: 1 }) })
     check(data, 4, summary?.querySelectorAll('.home-summary-card').length)
     check(data, true, summary?.nextElementSibling === link)
-    check(data, true, link?.nextElementSibling === review)
+    const guide = container.querySelector('.home-guide--prepare')
+    check(data, true, guide !== null)
+    check(data, true, link?.nextElementSibling === guide)
+    check(data, true, guide?.nextElementSibling === review)
     check(data, ROUTES.review, review?.getAttribute('href'))
     check(
       data,

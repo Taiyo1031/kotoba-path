@@ -11,6 +11,8 @@ export const APP_CONFIG = {
   /** 取り込み用の封筒(AIが出力するJSON)の識別子 */
   skeletonFormat: 'lang-study-skeleton',
   unitFormat: 'lang-study-unit',
+  /** 文字と発音のガイドの封筒 */
+  guideFormat: 'lang-study-guide',
   importEnvelopeVersion: 1,
   /** IndexedDB のデータベース名 */
   dbName: 'kotoba-path',

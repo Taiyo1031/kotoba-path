@@ -169,6 +169,17 @@ export function HomePage() {
           <span>{t('home.words.summary', { seen: wordStats.seen, mature: wordStats.mature })}</span>
         </Link>
       )}
+      {data.content.guide ? (
+        <Link className="home-guide" to={ROUTES.guide}>
+          <strong>{t('home.guide')}</strong>
+          <span>{t('home.guide.open')}</span>
+        </Link>
+      ) : data.plan.units.length > 0 ? (
+        <Link className="home-guide home-guide--prepare" to={ROUTES.data}>
+          <strong>{t('home.guide')}</strong>
+          <span>{t('home.guide.prepare')}</span>
+        </Link>
+      ) : null}
       {view.dueReviewCount > 0 ? (
         <Link className="button" to={ROUTES.review}>
           {t('home.review.button', { count: view.dueReviewCount })}

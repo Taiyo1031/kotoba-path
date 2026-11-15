@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { useI18n, useT } from '../../i18n'
 import { getNativeLanguage, getTargetLanguage } from '../../config/languages'
-import { buildSkeletonPrompt, buildUnitPrompt } from '../../prompts'
+import { buildGuidePrompt, buildSkeletonPrompt, buildUnitPrompt } from '../../prompts'
 import { useAppState } from '../../state/appState'
 import { copyText } from '../../utils/clipboard'
 import { downloadTextFile } from '../../utils/download'
@@ -13,7 +13,7 @@ export function PromptPanel() {
   const t = useT()
   const { language } = useI18n()
   const data = useAppState((state) => state.data)
-  const [mode, setMode] = useState<'' | 'skeleton' | 'unit'>('')
+  const [mode, setMode] = useState<'' | 'skeleton' | 'unit' | 'guide'>('')
   const [unitId, setUnitId] = useState('')
   const [part, setPart] = useState<'' | 'A' | 'B'>('')
   const [message, setMessage] = useState('')
@@ -21,7 +21,7 @@ export function PromptPanel() {
   const profile = data?.profile
   const units = data?.plan.units ?? []
   const action = nextPromptAction(data)
-  const effectiveMode: 'skeleton' | 'unit' =
+  const effectiveMode: 'skeleton' | 'unit' | 'guide' =
     mode !== '' ? mode : action.kind === 'unit' && units.length > 0 ? 'unit' : 'skeleton'
   const effectiveUnitId =
     unitId !== '' ? unitId : action.kind === 'unit' ? action.unitId : (units[0]?.id ?? '')
@@ -39,18 +39,23 @@ export function PromptPanel() {
     }
     const today = getToday()
     prompt =
-      effectiveMode === 'skeleton'
-        ? buildSkeletonPrompt({ profile: promptProfile, today })
-        : unit
-          ? buildUnitPrompt({
-              profile: promptProfile,
-              unit,
-              ...(part ? { part } : {}),
-              existingWordIds: Object.entries(data.content.units)
-                .filter(([id]) => id !== unit.id)
-                .flatMap(([, content]) => content.words.map((word) => word.id)),
-            })
-          : ''
+      effectiveMode === 'guide'
+        ? buildGuidePrompt({
+            profile: promptProfile,
+            unitHints: data.plan.units.map((u) => ({ title: u.title, keywords: u.keywords })),
+          })
+        : effectiveMode === 'skeleton'
+          ? buildSkeletonPrompt({ profile: promptProfile, today })
+          : unit
+            ? buildUnitPrompt({
+                profile: promptProfile,
+                unit,
+                ...(part ? { part } : {}),
+                existingWordIds: Object.entries(data.content.units)
+                  .filter(([id]) => id !== unit.id)
+                  .flatMap(([, content]) => content.words.map((word) => word.id)),
+              })
+            : ''
   }
   return (
     <section aria-labelledby="prompt-title">
@@ -74,7 +79,7 @@ export function PromptPanel() {
               )}
             </div>
             <div className="data-actions">
-              {(['skeleton', 'unit'] as const).map((value) => (
+              {(['skeleton', 'unit', 'guide'] as const).map((value) => (
                 <button
                   key={value}
                   aria-pressed={effectiveMode === value}
@@ -87,6 +92,9 @@ export function PromptPanel() {
                 </button>
               ))}
             </div>
+            {effectiveMode === 'guide' && (
+              <p className="data-hint">{t('data.prompt.guide.hint')}</p>
+            )}
             {effectiveMode === 'unit' && (
               <div className="data-actions">
                 <label>
@@ -141,7 +149,7 @@ export function PromptPanel() {
                 onClick={() => {
                   try {
                     downloadTextFile(
-                      `kotoba-path-prompt-${effectiveMode === 'skeleton' ? 'skeleton' : unit?.id}.md`,
+                      `kotoba-path-prompt-${effectiveMode === 'guide' ? 'guide' : effectiveMode === 'skeleton' ? 'skeleton' : unit?.id}.md`,
                       prompt,
                       'text/markdown',
                     )

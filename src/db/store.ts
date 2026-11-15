@@ -1,4 +1,6 @@
 ﻿import { openDB } from 'idb'
+import { GuideSchema } from '../schema/guide'
+import type { Guide } from '../schema/guide'
 import type { DBSchema, IDBPDatabase, IDBPTransaction } from 'idb'
 import type { z } from 'zod'
 import { APP_CONFIG } from '../config/app'
@@ -22,6 +24,8 @@ export interface AppStore {
   loadStudyData(now?: Date): Promise<StudyData | null>
   /** 1つのトランザクションで全置き換えする。 */
   saveStudyData(data: StudyData): Promise<void>
+  loadGuide(): Promise<Guide | undefined>
+  saveGuide(guide: Guide): Promise<void>
   loadProfile(): Promise<Profile | undefined>
   saveProfile(profile: Profile): Promise<void>
   loadPlan(): Promise<Plan | undefined>
@@ -108,12 +112,13 @@ class AppStoreImpl implements AppStore {
     const tx = db.transaction(['singletons', 'unitContent'], 'readonly')
     const singletons = tx.objectStore('singletons')
     const contents = tx.objectStore('unitContent')
-    const [profile, plan, progress, ids, values] = await Promise.all([
+    const [profile, plan, progress, ids, values, guide] = await Promise.all([
       singletons.get('profile'),
       singletons.get('plan'),
       singletons.get('progress'),
       contents.getAllKeys(),
       contents.getAll(),
+      singletons.get('guide'),
       tx.done,
     ])
     if (profile === undefined || plan === undefined || progress === undefined) {
@@ -131,7 +136,10 @@ class AppStoreImpl implements AppStore {
       meta: { exportedAt: now.toISOString(), appVersion: APP_CONFIG.appVersion },
       profile: parsedProfile,
       plan: parsedPlan,
-      content: { units },
+      content: {
+        units,
+        ...(guide !== undefined ? { guide: parseSaved('guide', GuideSchema, guide) } : {}),
+      },
       progress: parsedProgress,
     })
   }
@@ -147,11 +155,20 @@ class AppStoreImpl implements AppStore {
       for (const key of ['profile', 'plan', 'progress'] as const) {
         if (data[key] !== undefined) await singletons.put(data[key], key)
       }
+      if (data.content.guide !== undefined) await singletons.put(data.content.guide, 'guide')
       if (lastBackupAt !== undefined) await singletons.put(lastBackupAt, 'lastBackupAt')
       for (const [id, content] of Object.entries(data.content.units)) {
         if (content !== undefined) await contents.put(content, id)
       }
     })
+  }
+
+  loadGuide(): Promise<Guide | undefined> {
+    return this.loadSingleton('guide', GuideSchema)
+  }
+
+  saveGuide(guide: Guide): Promise<void> {
+    return this.saveSingleton('guide', guide)
   }
 
   loadProfile(): Promise<Profile | undefined> {

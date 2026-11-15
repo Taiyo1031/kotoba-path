@@ -1,3 +1,4 @@
+import { GuideSchema } from '../schema/guide'
 import { describe, it, expect } from 'vitest'
 import { APP_CONFIG } from '../config/app'
 import { createAppStore } from '../db'
@@ -324,5 +325,64 @@ describe('backup status', () => {
     })
     if (warnDays === 7)
       expect(getBackupStatus(at, now), '入力: 既定の閾値').toEqual({ daysSince: days, needsBackup })
+  })
+})
+
+function makeGuide() {
+  return GuideSchema.parse({
+    generatedBy: { tool: 'test', at: '2026-11-15T00:00:00.000Z' },
+    intro: 'Guide',
+    sounds: Array.from({ length: 10 }, (_, i) => ({
+      id: String(i),
+      grapheme: String(i),
+      reading: String(i),
+    })),
+    rules: [{ id: 'r1', title: 'Rule', body: 'Read aloud' }],
+  })
+}
+
+describe('guide backup', () => {
+  it('exports and parses the guide in JSON', () => {
+    const data = makeData()
+    data.content.guide = makeGuide()
+    const json = exportStudyDataJson(data)
+    expect(JSON.parse(json).content.guide, json).toEqual(data.content.guide)
+    expect(parseFullImport(json), json).toEqual({ ok: true, data, warnings: [] })
+  })
+  it.each(['current', 'incoming', 'neither'] as const)('merges guide from %s', async (source) => {
+    const current = makeData()
+    const incoming = makeData()
+    if (source !== 'neither') current.content.guide = makeGuide()
+    if (source === 'incoming') incoming.content.guide = { ...makeGuide(), version: 2 }
+    const input = JSON.stringify({ current, incoming })
+    const expected = incoming.content.guide ?? current.content.guide
+    const merged = mergeStudyData(current, incoming)
+    expect(merged.content.guide, input).toEqual(expected)
+    if (!expected) expect(merged.content, input).not.toHaveProperty('guide')
+    const store = createAppStore('test-guide-merge-' + source)
+    try {
+      await store.saveStudyData(current)
+      await applyFullImport(store, incoming, 'merge')
+      expect(await store.loadGuide(), input).toEqual(expected)
+    } finally {
+      store.close()
+    }
+  })
+  it('restores guide with replacement', async () => {
+    const store = createAppStore('test-guide-replace-1002')
+    const data = makeData()
+    data.content.guide = makeGuide()
+    const input = exportStudyDataJson(data)
+    try {
+      const parsed = parseFullImport(input)
+      expect(parsed.ok, input).toBe(true)
+      if (!parsed.ok) throw new Error(JSON.stringify(parsed))
+      await applyFullImport(store, parsed.data, 'replace')
+      expect((await store.loadStudyData(new Date(at)))?.content.guide, input).toEqual(
+        data.content.guide,
+      )
+    } finally {
+      store.close()
+    }
   })
 })

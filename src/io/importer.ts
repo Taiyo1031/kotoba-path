@@ -1,3 +1,5 @@
+import { GuideEnvelopeSchema } from '../schema/guide'
+import type { Guide } from '../schema/guide'
 import { APP_CONFIG } from '../config/app'
 import type { AppStore } from '../db'
 import { buildWordIdRewrites, normalizeWordId, normalizePhraseId, parseWordId } from '../ids'
@@ -27,6 +29,7 @@ export interface IdRewrite {
 export interface ImportContext {
   targetLanguage: string
   planUnitIds: ReadonlyArray<string>
+  existingGuide?: Guide
   existingContent?: UnitContent
   otherWordIds?: ReadonlySet<string>
   existingPlan?: Plan
@@ -51,12 +54,19 @@ export interface UnitPreview {
   rewrites: IdRewrite[]
   diff?: ContentDiff
 }
+export interface GuidePreview {
+  kind: 'guide'
+  ok: boolean
+  issues: ImportIssue[]
+  guide?: Guide
+  counts: { sounds: number; rules: number }
+}
 export interface FailedPreview {
   kind: 'invalid'
   ok: false
   issues: ImportIssue[]
 }
-export type ImportPreview = SkeletonPreview | UnitPreview | FailedPreview
+export type ImportPreview = SkeletonPreview | UnitPreview | GuidePreview | FailedPreview
 
 export function parseImportText(text: string, context: ImportContext): ImportPreview {
   const issues: ImportIssue[] = []
@@ -73,7 +83,11 @@ export function parseImportText(text: string, context: ImportContext): ImportPre
   }
   const format =
     input !== null && typeof input === 'object' && 'format' in input ? input.format : undefined
-  if (format !== APP_CONFIG.skeletonFormat && format !== APP_CONFIG.unitFormat) {
+  if (
+    format !== APP_CONFIG.skeletonFormat &&
+    format !== APP_CONFIG.unitFormat &&
+    format !== APP_CONFIG.guideFormat
+  ) {
     issue(
       '$.format',
       format === APP_CONFIG.dataFormat
@@ -81,6 +95,32 @@ export function parseImportText(text: string, context: ImportContext): ImportPre
         : '取り込み形式が不明です',
     )
     return failed()
+  }
+  if (format === APP_CONFIG.guideFormat) {
+    const parsed = GuideEnvelopeSchema.safeParse(input)
+    if (!parsed.success) {
+      zodIssuesToValidationIssues(parsed.error).forEach((entry) => issue(entry.path, entry.message))
+      return failed()
+    }
+    const { intro, sounds, rules } = parsed.data
+    const guide: Guide = {
+      version: (context.existingGuide?.version ?? 0) + 1,
+      verified: false,
+      generatedBy: { tool: 'import', at: context.now },
+      intro,
+      sounds,
+      rules,
+    }
+    if (sounds.length < 10 || sounds.length > 40)
+      issue('sounds', '音の数が10〜40の範囲外です', 'warning')
+    const ok = !issues.some((entry) => entry.severity === 'error')
+    return {
+      kind: 'guide',
+      ok,
+      issues,
+      ...(ok ? { guide } : {}),
+      counts: { sounds: sounds.length, rules: rules.length },
+    }
   }
   if (format === APP_CONFIG.skeletonFormat) {
     // 封筒スキーマに加え、PlanSchemaで単元IDの重複も検証する。
@@ -228,6 +268,11 @@ export async function commitImport(
   void now
   if (preview.kind === 'invalid' || !preview.ok)
     throw new Error('エラーのある取り込みは保存できません')
+  if (preview.kind === 'guide') {
+    if (!preview.guide) throw new Error('取り込む内容がありません')
+    await store.saveGuide(preview.guide)
+    return
+  }
   const plan = await store.loadPlan()
   if (preview.kind === 'skeleton') {
     const existing = new Map(plan?.units.map((unit) => [unit.id, unit]))

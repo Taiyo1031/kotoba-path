@@ -6,6 +6,7 @@ import { HomePage } from './pages/HomePage'
 import { UnitPage } from './pages/UnitPage'
 import { LessonPage } from './pages/LessonPage'
 import { WordsPage } from './pages/WordsPage'
+import { GuidePage } from './pages/GuidePage'
 import { ReviewPage } from './pages/ReviewPage'
 import { DataPage } from './pages/DataPage'
 import { SettingsPage } from './pages/SettingsPage'
@@ -30,6 +31,7 @@ export default function App() {
           <Route path={ROUTES.unit} element={<UnitPage />} />
           <Route path={ROUTES.review} element={<ReviewPage />} />
           <Route path={ROUTES.words} element={<WordsPage />} />
+          <Route path={ROUTES.guide} element={<GuidePage />} />
           <Route path={ROUTES.data} element={<DataPage />} />
           <Route path={ROUTES.settings} element={<SettingsPage />} />
           <Route path={ROUTES.debug} element={<DebugPage />} />

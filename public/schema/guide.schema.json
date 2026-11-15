@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "format": {
+      "type": "string",
+      "const": "lang-study-guide"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "intro": {
+      "default": "",
+      "type": "string"
+    },
+    "sounds": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "grapheme": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reading": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ipa": {
+            "default": "",
+            "type": "string"
+          },
+          "note": {
+            "default": "",
+            "type": "string"
+          },
+          "examples": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reading": {
+                  "default": "",
+                  "type": "string"
+                },
+                "meaning": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "target",
+                "meaning"
+              ]
+            }
+          },
+          "confusableWith": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "required": [
+          "id",
+          "grapheme",
+          "reading"
+        ]
+      }
+    },
+    "rules": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "body"
+        ]
+      }
+    }
+  },
+  "required": [
+    "format",
+    "version"
+  ],
+  "title": "GuideEnvelope"
+}

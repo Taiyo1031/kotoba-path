@@ -1,6 +1,6 @@
 ﻿// @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { I18nProvider, createTranslator } from '../../i18n'
@@ -10,6 +10,8 @@ import { StudyDataSchema, UnitEnvelopeSchema } from '../../schema'
 import { useAppState } from '../../state/appState'
 import { copyText } from '../../utils/clipboard'
 import { ImportPanel } from './ImportPanel'
+import * as db from '../../db'
+import { GuideEnvelopeSchema, GuideSchema } from '../../schema/guide'
 
 vi.mock('../../utils/clipboard', () => ({ copyText: vi.fn() }))
 
@@ -218,5 +220,145 @@ describe('ImportPanel', () => {
     }
     check({ input, action }, null, container.querySelector('#fix-prompt'))
     check({ input, action }, null, screen.queryByText(t('data.fix.title')))
+  })
+})
+
+function guideEnvelope() {
+  return GuideEnvelopeSchema.parse({
+    format: 'lang-study-guide',
+    version: 1,
+    intro: '文字の案内',
+    sounds: Array.from({ length: 12 }, (_, i) => ({
+      id: `s${i}`,
+      grapheme: `sound${i}`,
+      reading: `よみ${i}`,
+      note: i === 0 ? '発音のコツ' : '',
+    })),
+    rules: [{ id: 'r1', title: '規則', body: '説明' }],
+  })
+}
+
+describe('guide import', () => {
+  let store: db.AppStore
+  let databaseIndex = 0
+
+  beforeEach(() => {
+    store = db.createAppStore(`import-panel-guide-${databaseIndex++}`)
+    vi.spyOn(db, 'getAppStore').mockReturnValue(store)
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    store.close()
+  })
+
+  it('shows counts and only the first five sounds, then saves the guide', async () => {
+    const envelope = guideEnvelope()
+    const input = JSON.stringify(envelope)
+    const { user } = await validateText(input)
+    check(
+      input,
+      t('data.prompt.guide'),
+      screen.getByRole('heading', {
+        name: t('data.prompt.guide'),
+      }).textContent,
+    )
+    check(input, true, screen.queryByText(`${t('data.count.sounds')}: 12`) !== null)
+    check(input, true, screen.queryByText(`${t('data.count.rules')}: 1`) !== null)
+    const details = screen.getByText(t('data.sample.title')).closest('details')
+    check(input, true, details?.open)
+    check(
+      input,
+      [
+        'sound0 → よみ0: 発音のコツ',
+        'sound1 → よみ1',
+        'sound2 → よみ2',
+        'sound3 → よみ3',
+        'sound4 → よみ4',
+      ],
+      Array.from(details?.querySelectorAll('li') ?? []).map((row) => row.textContent),
+    )
+    const reload = vi.fn().mockResolvedValue(undefined)
+    useAppState.setState({ reload })
+    await user.click(screen.getByRole('button', { name: t('data.import.commit') }))
+    await waitFor(() => check(input, 1, reload.mock.calls.length))
+    const saved = await db.getAppStore().loadGuide()
+    check(
+      input,
+      { intro: envelope.intro, sounds: envelope.sounds, rules: envelope.rules },
+      saved && { intro: saved.intro, sounds: saved.sounds, rules: saved.rules },
+    )
+    check(input, false, saved?.verified)
+    check(input, null, screen.queryByText(t('data.sample.title')))
+  })
+
+  it('shows errors and a correction button for broken sound references', async () => {
+    const envelope = guideEnvelope()
+    const first = envelope.sounds[0]
+    if (!first) throw new Error('入力: guideEnvelope 期待値: 先頭の音 実際: undefined')
+    first.confusableWith = ['missing']
+    const input = JSON.stringify(envelope)
+    const { container } = await validateText(input)
+    check(
+      input,
+      true,
+      container.querySelector('.data-error')?.textContent?.includes('confusableWith'),
+    )
+    check(input, true, screen.queryByRole('button', { name: t('data.fix.button') }) !== null)
+    check(input, null, screen.queryByText(t('data.sample.title')))
+    check(
+      input,
+      true,
+      screen.getByRole<HTMLButtonElement>('button', {
+        name: t('data.import.commit'),
+      }).disabled,
+    )
+  })
+
+  it('verifies an existing guide, clears preview and reloads the saved state', async () => {
+    const guide = GuideSchema.parse({
+      ...guideEnvelope(),
+      version: 3,
+      generatedBy: { tool: 'test', at: now },
+    })
+    const data = useAppState.getState().data
+    if (!data) throw new Error('入力: app state 期待値: data 実際: null')
+    const reload = vi.fn(async () => {
+      const saved = await db.getAppStore().loadGuide()
+      useAppState.setState({ data: { ...data, content: { ...data.content, guide: saved } } })
+    })
+    useAppState.setState({ data: { ...data, content: { ...data.content, guide } }, reload })
+    const input = JSON.stringify(guideEnvelope())
+    const { user, container } = await validateText(input)
+    const lists = container.querySelectorAll('.data-unit-list')
+    check('guide row after unit list', true, lists[1]?.textContent?.includes(t('data.guide.label')))
+    await user.click(screen.getByRole('button', { name: t('data.verify') }))
+    await waitFor(() => check(guide, 1, reload.mock.calls.length))
+    check(guide, { ...guide, verified: true }, await db.getAppStore().loadGuide())
+    check(
+      guide,
+      true,
+      screen.getByRole<HTMLButtonElement>('button', {
+        name: t('data.verified'),
+      }).disabled,
+    )
+    check(guide, null, screen.queryByText(t('data.sample.title')))
+  })
+
+  it('passes the existing guide version when importing a replacement', async () => {
+    const data = useAppState.getState().data
+    if (!data) throw new Error('入力: app state 期待値: data 実際: null')
+    const guide = GuideSchema.parse({
+      ...guideEnvelope(),
+      version: 7,
+      generatedBy: { tool: 'test', at: now },
+    })
+    useAppState.setState({ data: { ...data, content: { ...data.content, guide } } })
+    const input = JSON.stringify(guideEnvelope())
+    const { user } = await validateText(input)
+    await user.click(screen.getByRole('button', { name: t('data.import.commit') }))
+    await waitFor(async () =>
+      check({ input, version: 7 }, 8, (await db.getAppStore().loadGuide())?.version),
+    )
   })
 })

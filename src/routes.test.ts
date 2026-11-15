@@ -30,7 +30,7 @@ describe('routes', () => {
     ])
   })
 
-  it.each([ROUTES.welcome, ROUTES.intro, ROUTES.unit, ROUTES.lesson, ROUTES.debug])(
+  it.each([ROUTES.welcome, ROUTES.intro, ROUTES.unit, ROUTES.lesson, ROUTES.debug, ROUTES.guide])(
     'NAV_ITEMS excludes %j',
     (path) => {
       expect(
@@ -40,7 +40,8 @@ describe('routes', () => {
     },
   )
 
-  it('defines all ten route patterns', () => {
+  it('defines all eleven route patterns', () => {
+    expect(Object.keys(ROUTES), '入力: ROUTES').toHaveLength(11)
     expect(ROUTES, '入力: ROUTES').toEqual({
       welcome: '/welcome',
       intro: '/intro',
@@ -49,6 +50,7 @@ describe('routes', () => {
       lesson: '/lesson/:unitId/:stepId',
       review: '/review',
       words: '/words',
+      guide: '/guide',
       data: '/data',
       settings: '/settings',
       debug: '/debug',

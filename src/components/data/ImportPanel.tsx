@@ -43,6 +43,7 @@ export function ImportPanel() {
       targetLanguage: data?.profile.targetLanguage ?? '',
       planUnitIds: data?.profile && data.plan ? data.plan.units.map((u) => u.id) : [],
       existingPlan: data?.plan,
+      existingGuide: data?.content.guide,
       unitIdsWithData: new Set([
         ...Object.keys(data?.content.units ?? {}),
         ...Object.keys(data?.progress.unitProgress ?? {}),
@@ -111,7 +112,9 @@ export function ImportPanel() {
                     ? 'data.prompt.skeleton'
                     : preview.kind === 'unit'
                       ? 'data.prompt.unit'
-                      : 'data.invalid',
+                      : preview.kind === 'guide'
+                        ? 'data.prompt.guide'
+                        : 'data.invalid',
                 )}
               </h3>
               {preview.kind !== 'invalid' && (
@@ -192,6 +195,19 @@ export function ImportPanel() {
                   </ul>
                 </details>
               )}
+              {preview.kind === 'guide' && preview.ok && preview.guide && (
+                <details open>
+                  <summary>{t('data.sample.title')}</summary>
+                  <ul>
+                    {preview.guide.sounds.slice(0, 5).map((sound) => (
+                      <li key={sound.id}>
+                        {sound.grapheme} → {sound.reading}
+                        {sound.note && `: ${sound.note}`}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
               {preview.kind === 'unit' && preview.ok && preview.content && (
                 <details open>
                   <summary>{t('data.sample.title')}</summary>
@@ -253,6 +269,27 @@ export function ImportPanel() {
             </li>
           ))}
         </ul>
+        {data?.content.guide && (
+          <ul className="data-unit-list">
+            <li>
+              <span>{t('data.guide.label')}</span>
+              <button
+                disabled={data.content.guide.verified || busy}
+                onClick={() => {
+                  const guide = data.content.guide
+                  if (guide)
+                    void run(async () => {
+                      await getAppStore().saveGuide({ ...guide, verified: true })
+                      setPreview(null)
+                      await reload()
+                    })
+                }}
+              >
+                {t(data.content.guide.verified ? 'data.verified' : 'data.verify')}
+              </button>
+            </li>
+          </ul>
+        )}
       </div>
     </section>
   )
