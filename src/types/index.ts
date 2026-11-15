@@ -15,6 +15,7 @@ export type {
   PlanUnit,
   Plan,
   UiLanguage,
+  StartLevel,
   Goal,
   Profile,
   FsrsRecord,
